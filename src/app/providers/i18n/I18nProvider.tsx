@@ -15,13 +15,23 @@ export default function I18nProvider({ children }: { children: ReactNode }) {
         const isRTL = isRTLLocale(locale);
         const direction = getTextDirection(locale);
 
-        // Set language and direction
+        // تنظیم lang و dir روی html
         root.setAttribute("lang", locale);
         root.setAttribute("dir", direction);
 
-        // Add RTL class for CSS targeting
+        // اضافه/حذف کلاس RTL
         root.classList.toggle("rtl", isRTL);
         root.classList.toggle("ltr", !isRTL);
+
+        // محاسبه عرض اسکرول و تنظیم padding برای جلوگیری از shift
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        if (isRTL) {
+            root.style.paddingLeft = `${scrollbarWidth}px`; // رزرو فضا در چپ برای اسکرول
+            root.style.paddingRight = "0px";
+        } else {
+            root.style.paddingRight = `${scrollbarWidth}px`; // رزرو فضا در راست برای LTR
+            root.style.paddingLeft = "0px";
+        }
 
         localStorage.setItem("locale", locale);
     }, [locale]);

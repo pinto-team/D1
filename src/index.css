@@ -23,7 +23,43 @@
     }
 
     * { @apply border-border; }
-    body { @apply bg-background text-foreground; }
+    body {
+        @apply bg-background text-foreground;
+        overflow-y: auto; /* اطمینان از فعال بودن اسکرول مرورگر */
+    }
+
+    /* Wrapper برای محتوای اصلی */
+    .scroll-container {
+        width: 100%;
+        height: 100vh; /* تمام صفحه */
+        overflow-y: auto; /* اسکرول عمودی */
+    }
+
+    /* در LTR، اسکرول پیش‌فرض (راست) */
+    html:not(.rtl) .scroll-container {
+        direction: ltr;
+    }
+
+    /* در RTL، اسکرول به چپ */
+    .rtl .scroll-container {
+        direction: rtl;
+    }
+
+    /* محتوای داخلی wrapper */
+    .content-wrapper {
+        direction: inherit; /* ارث‌بری از scroll-container */
+    }
+
+    /* اصلاح sidebar و محتوا در RTL */
+    .rtl .sidebar {
+        border-inline-end: none;
+        border-inline-start: 1px solid var(--sidebar-border);
+    }
+
+    .rtl .content-wrapper > * {
+        direction: rtl; /* اطمینان از RTL بودن متن و عناصر داخلی */
+        text-align: right;
+    }
 }
 
 /* Additional RTL support */
