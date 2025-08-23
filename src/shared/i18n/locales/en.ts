@@ -824,7 +824,7 @@ type Join<K, P> = K extends string
     : never
 
 type Paths<T> = {
-    [K in keyof T]: T[K] extends Record<string, any>
+    [K in keyof T]: T[K] extends Record<string, unknown>
         ? K extends string
             ? T[K] extends Record<string, never>
                 ? K

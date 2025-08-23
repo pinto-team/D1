@@ -6,12 +6,14 @@ import {
     CircleUser,
     DollarSignIcon,
     NotebookIcon,
+    Package,
     Settings as SettingsIcon,
     ShoppingBagIcon,
     Store,
     Truck,
     Warehouse,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { IconInnerShadowTop } from "@tabler/icons-react";
 import {
     Sidebar,
@@ -33,6 +35,7 @@ import { NavUser } from "@/components/layout/nav-user.tsx";
 import { useI18n } from "@/shared/hooks/useI18n.ts";
 import { useAuth } from "@/features/auth/hooks/useAuth.ts";
 import { isRTLLocale, getSidebarSide } from "@/shared/i18n/utils.ts";
+import { ROUTES } from "@/app/routes/routes";
 
 type TranslateFn = (key: string) => string;
 type MenuChild = { titleKey: string; url: string };
@@ -102,6 +105,11 @@ const itemsSchema: MenuItem[] = [
         ],
     },
     {
+        titleKey: "menu.products",
+        icon: Package,
+        url: ROUTES.PRODUCTS,
+    },
+    {
         titleKey: "menu.settings",
         icon: SettingsIcon,
         children: [
@@ -130,21 +138,16 @@ function MenuSection({
             <SidebarGroupContent>
                 <SidebarMenu>
                     {items.map((item) => (
-                        <Collapsible key={item.titleKey} className="group/collapsible">
-                            <SidebarMenuItem>
-                                <CollapsibleTrigger asChild>
-                                    <SidebarMenuButton
-                                        className="w-full flex items-center text-sidebar-foreground text-start"
-                                    >
-                                        <item.icon className="shrink-0 me-2" />
-                                        <span className="flex-1">{item.title}</span>
-                                        <ChevronDown
-                                            className="ms-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180 rtl:-scale-x-100"
-                                        />
-                                    </SidebarMenuButton>
-                                </CollapsibleTrigger>
-
-                                {item.children.length > 0 && (
+                        item.children.length > 0 ? (
+                            <Collapsible key={item.titleKey} className="group/collapsible">
+                                <SidebarMenuItem>
+                                    <CollapsibleTrigger asChild>
+                                        <SidebarMenuButton className="w-full flex items-center text-sidebar-foreground text-start">
+                                            <item.icon className="shrink-0 me-2" />
+                                            <span className="flex-1">{item.title}</span>
+                                            <ChevronDown className="ms-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180 rtl:-scale-x-100" />
+                                        </SidebarMenuButton>
+                                    </CollapsibleTrigger>
                                     <CollapsibleContent className="data-[state=closed]:hidden">
                                         <SidebarMenuSub>
                                             {item.children.map((subItem, index) => (
@@ -161,9 +164,18 @@ function MenuSection({
                                             ))}
                                         </SidebarMenuSub>
                                     </CollapsibleContent>
-                                )}
+                                </SidebarMenuItem>
+                            </Collapsible>
+                        ) : (
+                            <SidebarMenuItem key={item.titleKey}>
+                                <SidebarMenuButton asChild className="w-full flex items-center text-sidebar-foreground text-start">
+                                    <NavLink to={item.url ?? "#"}>
+                                        <item.icon className="shrink-0 me-2" />
+                                        <span className="flex-1">{item.title}</span>
+                                    </NavLink>
+                                </SidebarMenuButton>
                             </SidebarMenuItem>
-                        </Collapsible>
+                        )
                     ))}
                 </SidebarMenu>
             </SidebarGroupContent>
