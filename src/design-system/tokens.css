@@ -47,7 +47,13 @@
 
 /* Optional helper classes */
 @layer components {
-    .surface { @apply rounded-[var(--radius)] border bg-background text-foreground; }
-    .card-surface { @apply rounded-[var(--radius)] border bg-card text-card-foreground; }
-    .muted-surface { @apply rounded-[var(--radius)] border bg-muted text-muted-foreground; }
+    .surface {
+        @apply rounded-[var(--radius)] border bg-background text-foreground;
+    }
+    .card-surface {
+        @apply rounded-[var(--radius)] border bg-card text-card-foreground;
+    }
+    .muted-surface {
+        @apply rounded-[var(--radius)] border bg-muted text-muted-foreground;
+    }
 }

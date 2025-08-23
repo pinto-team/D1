@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
 
-    "types": ["vite/client"],                  // تایپ‌های Vite
+    "types": ["vite/client", "node"],                  // تایپ‌های Vite
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

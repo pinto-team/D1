@@ -1,27 +1,44 @@
 import type { Locale } from "@/shared/i18n/messages";
 
 const LOCALE_MAP: Record<Locale, string> = {
-    en: "en-US",
-    fa: "fa-IR",
-    tr: "tr-TR",
-    ar: "ar-SA",
-    'zh-CN': "zh-CN",
-    hi: "hi-IN",
-    es: "es-ES",
-    fr: "fr-FR",
-    bn: "bn-BD",
-    pt: "pt-PT",
-    ru: "ru-RU",
-    ur: "ur-PK",
-    id: "id-ID",
-    de: "de-DE",
-    ja: "ja-JP",
-    sw: "sw-TZ",
-    te: "te-IN",
+    en: "English",
+    fa: "فارسی",
+    tr: "Türkçe",
+    ar: "العربية",
+    hi: "हिन्दी",
+    es: "Español",
+    fr: "Français",
+    bn: "বাংলা",
+    pt: "Português",
+    ru: "Русский",
+    ur: "اردو",
+    id: "Bahasa Indonesia",
+    de: "Deutsch",
+    ja: "日本語",
+    sw: "Kiswahili",
+    te: "తెలుగు",
 };
 
 export function formatNumber(value: number, locale: Locale, options?: Intl.NumberFormatOptions): string {
-    const resolvedLocale = LOCALE_MAP[locale];
+    const intlLocaleMap: Record<string, string> = {
+        English: "en-US",
+        فارسی: "fa-IR",
+        Türkçe: "tr-TR",
+        العربية: "ar-SA",
+        हिन्दी: "hi-IN",
+        Español: "es-ES",
+        Français: "fr-FR",
+        বাংলা: "bn-BD",
+        Português: "pt-PT",
+        Русский: "ru-RU",
+        اردو: "ur-PK",
+        "Bahasa Indonesia": "id-ID",
+        Deutsch: "de-DE",
+        日本語: "ja-JP",
+        Kiswahili: "sw-TZ",
+        తెలుగు: "te-IN",
+    };
+    const resolvedLocale = intlLocaleMap[LOCALE_MAP[locale]] || "en-US";
     return new Intl.NumberFormat(resolvedLocale, {
         maximumFractionDigits: 2,
         ...options,
@@ -31,9 +48,8 @@ export function formatNumber(value: number, locale: Locale, options?: Intl.Numbe
 const PERSIAN_DIGITS = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"] as const;
 const HINDI_DIGITS = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"] as const;
 const BENGALI_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"] as const;
-const TELUGU_DIGITS = ["౦", "౧", "౨", "౩", "౪", "౫", "౬", "౭", "౮", "౯"] as const;// Urdu uses the same digits as Persian
+const TELUGU_DIGITS = ["౦", "౧", "౨", "౩", "౪", "౫", "౬", "౭", "౮", "౯"] as const;
 
-// Define a union type for all possible digit literals
 type DigitLiteral =
     | typeof PERSIAN_DIGITS[number]
     | typeof HINDI_DIGITS[number]
@@ -41,7 +57,7 @@ type DigitLiteral =
     | typeof TELUGU_DIGITS[number];
 
 export function toScriptDigits(input: string | number, digits: readonly string[]): string {
-    return String(input).replace(/[0-9]/g, (d) => digits[Number(d)]);
+    return String(input).replace(/[0-9]/g, (d) => digits[Number(d)] || d);
 }
 
 export function toEnglishDigits(input: string | number): string {
@@ -71,7 +87,6 @@ export function convertDigitsByLocale(input: string | number, locale: Locale): s
             return toScriptDigits(input, BENGALI_DIGITS);
         case "te":
             return toScriptDigits(input, TELUGU_DIGITS);
-        case "tr": // اضافه کردن زبان ترکی
         default:
             return toEnglishDigits(input);
     }
