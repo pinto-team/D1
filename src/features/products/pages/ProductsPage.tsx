@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useI18n } from "@/shared/hooks/useI18n";
 import { fetchProducts, type Product } from "../services/products.api";
 
@@ -14,16 +16,18 @@ const LIMIT = 10;
 export default function ProductsPage() {
     const { t } = useI18n();
     const [page, setPage] = useState(0);
+    const [query, setQuery] = useState("");
 
     const { data, isLoading } = useQuery({
-        queryKey: ["products", page],
-        queryFn: () => fetchProducts(LIMIT, page * LIMIT),
+        queryKey: ["products", page, query],
+        queryFn: () => fetchProducts(LIMIT, page * LIMIT, query),
     });
 
     const products = data?.products ?? [];
     const total = data?.total ?? 0;
+    const totalPages = Math.ceil(total / LIMIT);
     const hasPrev = page > 0;
-    const hasNext = (page + 1) * LIMIT < total;
+    const hasNext = page + 1 < totalPages;
 
     return (
         <SidebarProvider
@@ -43,27 +47,47 @@ export default function ProductsPage() {
                             <h1 className="px-4 text-2xl font-semibold lg:px-6">
                                 {t("menu.products")}
                             </h1>
+                            <div className="flex items-center justify-between gap-2 px-4 lg:px-6">
+                                <Input
+                                    placeholder={t("common.search")}
+                                    value={query}
+                                    onChange={(e) => {
+                                        setPage(0);
+                                        setQuery(e.target.value);
+                                    }}
+                                    className="max-w-xs"
+                                />
+                                <Button onClick={() => alert("Add Product")}>+ Add Product</Button>
+                            </div>
                             <div className="grid gap-4 px-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:px-6">
                                 {isLoading && <div>{t("loading")}</div>}
                                 {!isLoading &&
                                     products.map((product: Product) => (
-                                        <Card key={product.id} className="@container/card">
-                                            <CardHeader className="p-0">
-                                                <img
-                                                    src={product.thumbnail}
-                                                    alt={product.title}
-                                                    className="h-40 w-full rounded-t-xl object-cover"
-                                                />
-                                            </CardHeader>
-                                            <CardContent className="p-4">
-                                                <CardTitle className="text-base">
-                                                    {product.title}
-                                                </CardTitle>
-                                                <p className="text-sm text-muted-foreground">
-                                                    ${product.price}
-                                                </p>
-                                            </CardContent>
-                                        </Card>
+                                        <Link
+                                            key={product.id}
+                                            to={`/products/${product.id}`}
+                                            className="block"
+                                        >
+                                            <Card className="@container/card">
+                                                <CardHeader className="p-0">
+                                                    <div className="aspect-square w-full overflow-hidden rounded-t-xl">
+                                                        <img
+                                                            src={product.thumbnail}
+                                                            alt={product.title}
+                                                            className="h-full w-full object-contain"
+                                                        />
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent className="p-4">
+                                                    <CardTitle className="text-base">
+                                                        {product.title}
+                                                    </CardTitle>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        ${product.price}
+                                                    </p>
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
                                     ))}
                             </div>
                             <div className="flex items-center justify-between px-4 lg:px-6">
@@ -74,6 +98,17 @@ export default function ProductsPage() {
                                 >
                                     Previous
                                 </Button>
+                                <div className="flex items-center gap-2">
+                                    {Array.from({ length: totalPages }).map((_, i) => (
+                                        <Button
+                                            key={i}
+                                            variant={i === page ? "default" : "outline"}
+                                            onClick={() => setPage(i)}
+                                        >
+                                            {i + 1}
+                                        </Button>
+                                    ))}
+                                </div>
                                 <Button
                                     variant="outline"
                                     onClick={() => setPage((p) => p + 1)}
