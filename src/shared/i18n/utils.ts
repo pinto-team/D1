@@ -1,7 +1,7 @@
 import type { Locale } from './messages';
 
 // Define RTL languages
-export const RTL_LANGUAGES: Locale[] = ['fa', 'ar', 'ur'];
+export const RTL_LANGUAGES: Locale[] = ['fa'];
 
 // Check if a locale is RTL
 export const isRTLLocale = (locale: Locale): boolean => {
@@ -67,20 +67,6 @@ export const getLocaleDisplayName = (locale: Locale): string => {
   const names: Record<Locale, string> = {
     en: 'English',
     fa: 'فارسی',
-    ar: 'العربية',
-    hi: 'हिन्दी',
-    es: 'Español',
-    fr: 'Français',
-    bn: 'বাংলা',
-    pt: 'Português',
-    ru: 'Русский',
-    ur: 'اردو',
-    id: 'Bahasa Indonesia',
-    de: 'Deutsch',
-    ja: '日本語',
-    sw: 'Kiswahili',
-    te: 'తెలుగు',
-    tr: 'Türkçe'
   };
   return names[locale] || locale;
 };
