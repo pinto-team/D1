@@ -15,20 +15,6 @@ import { getLocaleDisplayName, getTextDirection } from "@/shared/i18n/utils.ts";
 const LANGS: { code: Locale }[] = [
     { code: "en" },
     { code: "fa" },
-    { code: "ar" },
-    { code: "hi" },
-    { code: "es" },
-    { code: "fr" },
-    { code: "bn" },
-    { code: "pt" },
-    { code: "ru" },
-    { code: "ur" },
-    { code: "id" },
-    { code: "de" },
-    { code: "ja" },
-    { code: "sw" },
-    { code: "te" },
-    { code: "tr" },
 ];
 
 export default function LanguageToggle() {

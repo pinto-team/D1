@@ -1,5 +1,5 @@
 // features/auth/services/auth.api.ts
-import api from "@/lib/axios"
+import { authClient } from "@/lib/axios"
 import { API_ROUTES } from "@/shared/constants/apiRoutes"
 import { handleAsyncError } from "@/shared/lib/errors"
 import { defaultLogger } from "@/shared/lib/logger"
@@ -14,7 +14,7 @@ export async function apiLogin(username: string, password: string) {
     logger.info('Attempting login')
 
     return handleAsyncError(
-        api.post(API_ROUTES.AUTH.LOGIN, { username, password })
+        authClient.post(API_ROUTES.AUTH.LOGIN, { username, password })
             .then(({ data }) => {
                 logger.info('Login successful')
                 return data
@@ -32,7 +32,7 @@ export async function apiMe(token: string) {
     logger.info('Fetching user info')
 
     return handleAsyncError(
-        api.get(API_ROUTES.AUTH.ME, {
+        authClient.get(API_ROUTES.AUTH.ME, {
             headers: { Authorization: `Bearer ${token}` },
         }).then(({ data }) => {
             logger.info('User info fetched successfully')
@@ -51,11 +51,73 @@ export async function apiRefresh(refreshToken: string) {
     logger.info('Attempting token refresh')
 
     return handleAsyncError(
-        api.post(API_ROUTES.AUTH.REFRESH, { refreshToken })
+        authClient.post(API_ROUTES.AUTH.REFRESH, { refreshToken })
             .then(({ data }) => {
                 logger.info('Token refresh successful')
                 return data
             }),
         'Token refresh failed'
+    )
+}
+
+export async function apiLogout() {
+    const logger = defaultLogger.withContext({
+        component: 'auth.api',
+        action: 'logout'
+    })
+
+    logger.info('Attempting logout')
+
+    return handleAsyncError(
+        authClient.post(API_ROUTES.AUTH.LOGOUT)
+            .then(({ data }) => {
+                logger.info('Logout successful')
+                return data
+            }),
+        'Logout failed'
+    )
+}
+
+export async function apiRegister(userData: {
+    username: string
+    email: string
+    password: string
+    firstName?: string
+    lastName?: string
+}) {
+    const logger = defaultLogger.withContext({
+        component: 'auth.api',
+        action: 'register',
+        email: userData.email
+    })
+
+    logger.info('Attempting user registration')
+
+    return handleAsyncError(
+        authClient.post(API_ROUTES.AUTH.REGISTER, userData)
+            .then(({ data }) => {
+                logger.info('Registration successful')
+                return data
+            }),
+        'Registration failed'
+    )
+}
+
+export async function apiForgotPassword(email: string) {
+    const logger = defaultLogger.withContext({
+        component: 'auth.api',
+        action: 'forgotPassword',
+        email
+    })
+
+    logger.info('Attempting password reset request')
+
+    return handleAsyncError(
+        authClient.post(API_ROUTES.AUTH.FORGOT_PASSWORD, { email })
+            .then(({ data }) => {
+                logger.info('Password reset request successful')
+                return data
+            }),
+        'Password reset request failed'
     )
 }

@@ -13,16 +13,32 @@ import QueryProvider from "@/app/providers/query/QueryProvider.tsx";
 
 // Initialize i18n
 import "@/shared/i18n/i18n";
-createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-        <ThemeProvider>
-            <I18nProvider>
-                <AuthProvider>
-                    <QueryProvider>
-                        <RouterProvider router={router} />
-                    </QueryProvider>
-                </AuthProvider>
-            </I18nProvider>
-        </ThemeProvider>
-    </StrictMode>
-);
+
+// Conditionally start MSW in development
+async function enableMocking() {
+    if (import.meta.env.VITE_ENABLE_MSW === 'true') {
+        if (import.meta.env.DEV) {
+            const { worker } = await import('./mocks/browser')
+            return worker.start({
+                onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+            })
+        }
+    }
+}
+
+// Start the app after MSW is ready (if enabled)
+enableMocking().then(() => {
+    createRoot(document.getElementById("root")!).render(
+        <StrictMode>
+            <ThemeProvider>
+                <I18nProvider>
+                    <AuthProvider>
+                        <QueryProvider>
+                            <RouterProvider router={router} />
+                        </QueryProvider>
+                    </AuthProvider>
+                </I18nProvider>
+            </ThemeProvider>
+        </StrictMode>
+    );
+});

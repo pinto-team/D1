@@ -4,6 +4,7 @@ import axios, {
     AxiosHeaders,
     InternalAxiosRequestConfig,
     AxiosRequestConfig,
+    AxiosInstance,
 } from "axios"
 import {
     getAccessToken,
@@ -12,7 +13,7 @@ import {
     clearAuthStorage,
 } from "@/features/auth/storage"
 import { defaultLogger } from "@/shared/lib/logger"
-import { API_ROUTES } from "@/shared/constants/apiRoutes"
+import { API_CONFIG } from "@/shared/config/api.config"
 
 type PendingResolver = {
     resolve: (token: string) => void
@@ -24,10 +25,12 @@ type RefreshResponse = {
     refreshToken: string
 }
 
-const instance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
-    headers: new AxiosHeaders({ "Content-Type": "application/json" }),
-})
+type ClientConfig = {
+    baseURL: string
+    feature?: string
+    enableAuth?: boolean
+    enableRefresh?: boolean
+}
 
 const RETRY_FLAG = "__isRetryRequest"
 
@@ -54,108 +57,164 @@ function setAuthHeaderOnConfig(config: AxiosRequestConfig, token: string) {
     config.headers = headers
 }
 
-instance.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-        const token = getAccessToken()
-        if (token) {
-            const headers = toAxiosHeaders(config.headers)
-            if (!headers.has("Authorization")) {
-                headers.set("Authorization", `Bearer ${token}`)
+function createApiClient(config: ClientConfig): AxiosInstance {
+    const instance = axios.create({
+        baseURL: config.baseURL,
+        headers: new AxiosHeaders({ "Content-Type": "application/json" }),
+    })
+
+    // Add feature header if specified
+    if (config.feature) {
+        instance.defaults.headers.common["X-Feature"] = config.feature
+    }
+
+    // Request interceptor
+    instance.interceptors.request.use(
+        (requestConfig: InternalAxiosRequestConfig) => {
+            const token = getAccessToken()
+            if (token) {
+                const headers = toAxiosHeaders(requestConfig.headers)
+                if (!headers.has("Authorization")) {
+                    headers.set("Authorization", `Bearer ${token}`)
+                }
+                requestConfig.headers = headers
             }
-            config.headers = headers
-        }
-        defaultLogger.info("API Request", {
-            method: config.method?.toUpperCase(),
-            url: config.url,
-            baseURL: config.baseURL,
-            hasAuth: !!token,
-        })
-        return config
-    },
-    (err) => Promise.reject(err),
-)
 
-instance.interceptors.response.use(
-    (response) => {
-        defaultLogger.info("API Response", {
-            status: response.status,
-            url: response.config.url,
-            method: response.config.method?.toUpperCase(),
-        })
-        return response
-    },
-    (error: AxiosError) => {
-        defaultLogger.error("API Error", {
-            status: error.response?.status,
-            url: error.config?.url,
-            method: (error.config as AxiosRequestConfig | undefined)?.method?.toUpperCase(),
-            message: error.message,
-            data: error.response?.data,
-        })
-        return Promise.reject(error)
-    },
-)
-
-instance.interceptors.response.use(
-    (response) => response,
-    async (error: AxiosError) => {
-        const originalRequest = error.config as (InternalAxiosRequestConfig & {
-            [RETRY_FLAG]?: boolean
-        }) | undefined
-        const status = error.response?.status
-
-        if (status !== 401 || !originalRequest || originalRequest[RETRY_FLAG]) {
-            return Promise.reject(error)
-        }
-
-        if (isRefreshing) {
-            try {
-                const newToken = await new Promise<string>((resolve, reject) => {
-                    pendingQueue.push({ resolve, reject })
+            // Development logging
+            if (API_CONFIG.DEV.LOG_REQUESTS) {
+                defaultLogger.info("API Request", {
+                    method: requestConfig.method?.toUpperCase(),
+                    url: requestConfig.url,
+                    baseURL: requestConfig.baseURL,
+                    hasAuth: !!token,
+                    feature: config.feature,
                 })
-                setAuthHeaderOnConfig(originalRequest, newToken)
-                return instance(originalRequest)
-            } catch (e) {
-                return Promise.reject(e)
-            }
-        }
-
-        originalRequest[RETRY_FLAG] = true
-        isRefreshing = true
-
-        try {
-            const rt = getRefreshToken()
-            if (!rt) {
-                throw error
             }
 
-            const baseURL = import.meta.env.VITE_API_URL
-            const refreshUrl = `${baseURL}${API_ROUTES.AUTH.REFRESH}`
+            return requestConfig
+        },
+        (err) => Promise.reject(err),
+    )
 
-            const { data } = await axios.post<RefreshResponse>(
-                refreshUrl,
-                { refreshToken: rt },
-                { headers: new AxiosHeaders({ "Content-Type": "application/json" }) },
-            )
+    // Response interceptor for logging
+    instance.interceptors.response.use(
+        (response) => {
+            if (API_CONFIG.DEV.LOG_RESPONSES) {
+                defaultLogger.info("API Response", {
+                    status: response.status,
+                    url: response.config.url,
+                    method: response.config.method?.toUpperCase(),
+                    feature: config.feature,
+                })
+            }
+            return response
+        },
+        (error: AxiosError) => {
+            defaultLogger.error("API Error", {
+                status: error.response?.status,
+                url: error.config?.url,
+                method: (error.config as AxiosRequestConfig | undefined)?.method?.toUpperCase(),
+                message: error.message,
+                data: error.response?.data,
+                feature: config.feature,
+            })
+            return Promise.reject(error)
+        },
+    )
 
-            const newAccess = data.accessToken
-            const newRefresh = data.refreshToken
+    // Response interceptor for auth refresh (only if enabled)
+    if (config.enableRefresh !== false) {
+        instance.interceptors.response.use(
+            (response) => response,
+            async (error: AxiosError) => {
+                const originalRequest = error.config as (InternalAxiosRequestConfig & {
+                    [RETRY_FLAG]?: boolean
+                }) | undefined
+                const status = error.response?.status
 
-            setTokens(newAccess, newRefresh)
-            instance.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`
+                if (status !== 401 || !originalRequest || originalRequest[RETRY_FLAG]) {
+                    return Promise.reject(error)
+                }
 
-            processQueue(null, newAccess)
+                if (isRefreshing) {
+                    try {
+                        const newToken = await new Promise<string>((resolve, reject) => {
+                            pendingQueue.push({ resolve, reject })
+                        })
+                        setAuthHeaderOnConfig(originalRequest, newToken)
+                        return instance(originalRequest)
+                    } catch (e) {
+                        return Promise.reject(e)
+                    }
+                }
 
-            setAuthHeaderOnConfig(originalRequest, newAccess)
-            return instance(originalRequest)
-        } catch (refreshErr) {
-            processQueue(refreshErr)
-            clearAuthStorage()
-            return Promise.reject(refreshErr)
-        } finally {
-            isRefreshing = false
-        }
-    },
-)
+                originalRequest[RETRY_FLAG] = true
+                isRefreshing = true
 
-export default instance
+                try {
+                    const rt = getRefreshToken()
+                    if (!rt) {
+                        throw error
+                    }
+
+                    // Use auth API for refresh
+                    const refreshUrl = `${API_CONFIG.AUTH.BASE_URL}/auth/refresh`
+
+                    const { data } = await axios.post<RefreshResponse>(
+                        refreshUrl,
+                        { refreshToken: rt },
+                        { headers: new AxiosHeaders({ "Content-Type": "application/json" }) },
+                    )
+
+                    const newAccess = data.accessToken
+                    const newRefresh = data.refreshToken
+
+                    setTokens(newAccess, newRefresh)
+                    instance.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`
+
+                    processQueue(null, newAccess)
+
+                    setAuthHeaderOnConfig(originalRequest, newAccess)
+                    return instance(originalRequest)
+                } catch (refreshErr) {
+                    processQueue(refreshErr)
+                    clearAuthStorage()
+                    return Promise.reject(refreshErr)
+                } finally {
+                    isRefreshing = false
+                }
+            },
+        )
+    }
+
+    return instance
+}
+
+// Default client instances
+export const apiClient = createApiClient({
+    baseURL: API_CONFIG.BASE_URL,
+    enableAuth: true,
+    enableRefresh: true,
+})
+
+export const authClient = createApiClient({
+    baseURL: API_CONFIG.AUTH.BASE_URL,
+    feature: "auth",
+    enableAuth: true,
+    enableRefresh: true,
+})
+
+export const catalogClient = createApiClient({
+    baseURL: API_CONFIG.CATALOG.BASE_URL,
+    feature: "catalog",
+    enableAuth: true,
+    enableRefresh: false, // Catalog might not need refresh
+})
+
+// Factory function for creating custom clients
+export function createFeatureClient(config: ClientConfig): AxiosInstance {
+    return createApiClient(config)
+}
+
+// Legacy export for backward compatibility
+export default apiClient
