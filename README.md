@@ -87,9 +87,9 @@ Configure different API endpoints for different features:
 
 ```typescript
 // .env.local
-VITE_API_URL=http://localhost:3000          # Main API
-VITE_AUTH_API_URL=http://localhost:3001     # Auth service
-VITE_CATALOG_API_URL=http://localhost:3002  # Catalog service
+VITE_API_URL=http//localhost:3000          # Main API
+VITE_AUTH_API_URL=http//localhost:3001     # Auth service
+VITE_CATALOG_API_URL=http//localhost:3002  # Catalog service
 ```
 
 ### MSW (Mock Service Worker)

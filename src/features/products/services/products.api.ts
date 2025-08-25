@@ -81,18 +81,17 @@ export interface ProductReview {
     date: string;
 }
 
-export async function fetchProducts(limit: number, skip: number, q?: string): Promise<ProductListResponse> {
+export async function fetchProducts(limit: number, p0: number, q?: string): Promise<ProductListResponse> {
     const logger = defaultLogger.withContext({
         component: 'products.api',
         action: 'fetchProducts',
         limit,
-        skip,
         query: q
     })
 
     logger.info('Fetching products')
 
-    const params: Record<string, string | number> = { limit, skip };
+    const params: Record<string, string | number> = { limit };
     const route = q && q.trim().length > 0 ? API_ROUTES.PRODUCTS.SEARCH : API_ROUTES.PRODUCTS.LIST;
     
     if (q && q.trim().length > 0) {

@@ -138,5 +138,15 @@
   "products.qr_code": "کد QR",
   "products.reviews": "نقد و بررسی‌ها",
   "products.no_reviews": "هنوز نظری ثبت نشده است",
+  "common.active": "فعال",
+  "common.inactive": "غیرفعال",
+  "common.yes": "بله",
+  "common.no": "خیر",
+  "common.status": "وضعیت",
+  "products.tax_rate": "نرخ مالیات",
+  "products.allow_backorder": "اجازه پیش‌سفارش",
+  "products.shipping_information": "اطلاعات ارسال",
+  "products.default_return_policy": "سیاست مرجوعی پیش‌فرض",
+  "products.no_image": "بدون تصویر",
   "login.securityNote": "از ایمیل درست استفاده کنید. با تغییر تم یا زبان، این صفحه با دیزاین سیستم هماهنگ می‌ماند."
 }

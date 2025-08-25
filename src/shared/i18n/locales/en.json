@@ -138,5 +138,15 @@
   "products.qr_code": "QR code",
   "products.reviews": "Reviews",
   "products.no_reviews": "No reviews yet",
+  "common.active": "Active",
+  "common.inactive": "Inactive",
+  "common.yes": "Yes",
+  "common.no": "No",
+  "common.status": "Status",
+  "products.tax_rate": "Tax Rate",
+  "products.allow_backorder": "Allow backorder",
+  "products.shipping_information": "Shipping information",
+  "products.default_return_policy": "Default return policy",
+  "products.no_image": "No image",
   "login.securityNote": "Use a valid email. With theme or language changes, this page stays aligned with the design system."
 }

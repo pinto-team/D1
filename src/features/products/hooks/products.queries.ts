@@ -28,7 +28,6 @@ export function useProducts(limit: number, skip: number, q?: string) {
         component: 'products.queries', 
         action: 'useProducts',
         limit,
-        skip,
         query: q
     })
 
