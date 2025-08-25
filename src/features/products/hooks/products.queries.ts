@@ -16,10 +16,10 @@ export const productsQueryKeys = {
     list: (filters: { limit: number; skip: number; q?: string }) => 
         [...productsQueryKeys.lists(), filters] as const,
     details: () => [...productsQueryKeys.all, 'detail'] as const,
-    detail: (id: number) => [...productsQueryKeys.details(), id] as const,
+    detail: (id: string) => [...productsQueryKeys.details(), id] as const,
     categories: () => [...productsQueryKeys.all, 'categories'] as const,
     brands: () => [...productsQueryKeys.all, 'brands'] as const,
-    reviews: (productId: number) => [...productsQueryKeys.all, 'reviews', productId] as const,
+    reviews: (productId: string) => [...productsQueryKeys.all, 'reviews', productId] as const,
 } as const
 
 // Products list query
@@ -55,7 +55,7 @@ export function useInfiniteProducts(limit: number, q?: string) {
         queryFn: ({ pageParam = 0 }) => fetchProducts(limit, pageParam, q),
         initialPageParam: 0,
         getNextPageParam: (lastPage, allPages) => {
-            const totalPages = Math.ceil(lastPage.total / limit)
+            const totalPages = Math.ceil(lastPage.pagination.total / limit)
             const currentPage = allPages.length
             return currentPage < totalPages ? currentPage * limit : undefined
         },
@@ -65,7 +65,7 @@ export function useInfiniteProducts(limit: number, q?: string) {
 }
 
 // Single product query
-export function useProduct(id: number) {
+export function useProduct(id: string) {
     const logger = defaultLogger.withContext({ 
         component: 'products.queries', 
         action: 'useProduct',
@@ -112,7 +112,7 @@ export function useProductBrands() {
 }
 
 // Product reviews query
-export function useProductReviews(productId: number) {
+export function useProductReviews(productId: string) {
     const logger = defaultLogger.withContext({ 
         component: 'products.queries', 
         action: 'useProductReviews',
