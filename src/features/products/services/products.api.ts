@@ -62,6 +62,43 @@ export interface Dimensions {
     height: number;
 }
 
+// New: AddProductRequest interface for creating products
+export interface AddProductRequest {
+    seller_id: string;          // UUID
+    warehouse_id: string;       // UUID
+    sku: string;                // e.g., "AB-12345"
+    name: string;               // product name
+    description?: string;       // optional description
+    category_id: string;        // UUID
+    brand?: string;             // optional brand
+
+    base_price: number;         // base price
+    purchase_price?: number;    // optional purchase price
+    currency: string;           // e.g., "USD"
+    tax_rate?: number;          // 0.05 means 5%
+
+    min_order_quantity: number; // minimum order quantity
+    min_order_multiple?: number;// minimum multiple
+
+    stock: number;              // total stock
+
+    warehouse_availability?: WarehouseAvailability[];
+    pricing_tiers?: PricingTier[];
+
+    uom?: string;               // unit (unit, pack, case)
+    pack_size?: number;         // units per pack
+    case_size?: number;         // packs per case
+
+    barcode?: string;           // EAN/UPC
+
+    attributes?: Attributes;    // extra attributes
+    allow_backorder?: boolean;  // allow backorder
+    is_active?: boolean;        // active flag
+
+    images?: string[];          // 1..4 image URLs
+    tags?: string[];            // tags
+}
+
 export interface ProductListResponse {
     items: Product[];
     pagination: Pagination;
@@ -179,5 +216,26 @@ export async function fetchProductReviews(productId: string): Promise<ProductRev
                 return data as ProductReview[]
             }),
         'Failed to fetch product reviews'
+    )
+}
+
+// New: Create product API
+export async function createProduct(payload: AddProductRequest): Promise<Product> {
+    const logger = defaultLogger.withContext({
+        component: 'products.api',
+        action: 'createProduct',
+        sku: payload.sku,
+        name: payload.name,
+    })
+
+    logger.info('Creating product')
+
+    return handleAsyncError(
+        catalogClient.post(API_ROUTES.PRODUCTS.CREATE, payload)
+            .then(({ data }) => {
+                logger.info('Product created successfully', { id: data?.id })
+                return data as Product
+            }),
+        'Failed to create product'
     )
 }

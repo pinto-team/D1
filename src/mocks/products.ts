@@ -1,9 +1,10 @@
 // mocks/products.ts
 import { http, HttpResponse } from 'msw'
 import { API_ROUTES } from '@/shared/constants/apiRoutes'
+import type { AddProductRequest, Product } from '@/features/products/services/products.api'
 
 // Mock product data with new model
-const mockProducts = [
+const mockProducts: Product[] = [
     {
         id: '1',
         seller_id: 'seller-1',
@@ -166,6 +167,56 @@ export const productsHandlers = [
                 total: mockProducts.length,
             },
         })
+    }),
+
+    // New: Create product
+    http.post(API_ROUTES.PRODUCTS.CREATE, async ({ request }) => {
+        try {
+            const body = await request.json() as AddProductRequest | null
+            const now = new Date().toISOString()
+            const newId = String(mockProducts.length + 1)
+            const taxRate = body && typeof body.tax_rate === 'number' ? body.tax_rate : 0
+            const newProduct = {
+                id: newId,
+                seller_id: body?.seller_id ?? 'seller-unknown',
+                warehouse_id: body?.warehouse_id ?? 'wh-unknown',
+                sku: body?.sku ?? `SKU-${newId}`,
+                name: body?.name ?? 'New Product',
+                description: body?.description ?? '',
+                category_id: body?.category_id ?? 'uncategorized',
+                brand: body?.brand ?? '',
+                base_price: body?.base_price ?? 0,
+                purchase_price: body?.purchase_price ?? (body?.base_price ?? 0),
+                currency: body?.currency ?? 'USD',
+                tax_rate: taxRate,
+                min_order_quantity: body?.min_order_quantity ?? 1,
+                min_order_multiple: body?.min_order_multiple ?? null,
+                stock: body?.stock ?? 0,
+                warehouse_availability: body?.warehouse_availability ?? [],
+                pricing_tiers: body?.pricing_tiers ?? [],
+                uom: body?.uom ?? 'unit',
+                pack_size: body?.pack_size ?? null,
+                case_size: body?.case_size ?? null,
+                barcode: body?.barcode ?? undefined,
+                attributes: body?.attributes ?? {},
+                allow_backorder: body?.allow_backorder ?? false,
+                is_active: body?.is_active ?? true,
+                images: Array.isArray(body?.images) && body!.images!.length ? body!.images!.slice(0,4) : [
+                    `https://picsum.photos/800/600?random=${Math.floor(Math.random()*1000)}`
+                ],
+                tags: Array.isArray(body?.tags) ? body!.tags! : [],
+                created_at: now,
+                updated_at: now,
+            } as Product
+
+            mockProducts.unshift(newProduct)
+            return HttpResponse.json(newProduct, { status: 201 })
+        } catch (e) {
+            return new HttpResponse(
+                JSON.stringify({ message: 'Invalid request body' }),
+                { status: 400 }
+            )
+        }
     }),
 
     // Search products
