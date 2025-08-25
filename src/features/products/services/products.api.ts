@@ -4,57 +4,84 @@ import { API_ROUTES } from "@/shared/constants/apiRoutes"
 import { handleAsyncError } from "@/shared/lib/errors"
 import { defaultLogger } from "@/shared/lib/logger"
 
+// New product model and related interfaces
 export interface Product {
-    id: number;
-    title: string;
-    price: number;
-    thumbnail: string;
-}
-
-export interface ProductsResponse {
-    products: Product[];
-    total: number;
-    skip: number;
-    limit: number;
-}
-
-export interface ProductDetails extends Product {
-    description: string;
-    category: string;
-    brand: string;
-    discountPercentage: number;
-    rating: number;
-    stock: number;
-    tags: string[];
+    id: string;
+    seller_id: string;
+    warehouse_id: string;
     sku: string;
-    weight: number;
-    dimensions: {
-        width: number;
-        height: number;
-        depth: number;
-    };
-    warrantyInformation: string;
-    shippingInformation: string;
-    availabilityStatus: string;
-    reviews: {
-        reviewerName: string;
-        reviewerEmail: string;
-        rating: number;
-        comment: string;
-        date: string;
-    }[];
-    returnPolicy: string;
-    minimumOrderQuantity: number;
-    meta: {
-        createdAt: string;
-        updatedAt: string;
-        barcode: string;
-        qrCode: string;
-    };
+    name: string;
+    description?: string;
+    category_id: string;
+    brand?: string;
+    base_price: number;
+    purchase_price?: number;
+    currency: string;
+    tax_rate: number;
+    min_order_quantity: number;
+    min_order_multiple?: number | null;
+    stock: number;
+    warehouse_availability?: WarehouseAvailability[];
+    pricing_tiers?: PricingTier[];
+    uom?: string;
+    pack_size?: number | null;
+    case_size?: number | null;
+    barcode?: string;
+    attributes?: Attributes;
+    allow_backorder: boolean;
+    is_active: boolean;
     images: string[];
+    tags: string[];
+    created_at: string;
+    updated_at: string;
 }
 
-export async function fetchProducts(limit: number, skip: number, q?: string): Promise<ProductsResponse> {
+export interface WarehouseAvailability {
+    warehouse_id: string;
+    stock: number;
+    lead_time_days: number;
+}
+
+export interface PricingTier {
+    min_qty: number;
+    unit_price: number;
+}
+
+export interface Attributes {
+    weight?: number;
+    dimensions?: Dimensions;
+    packaging?: string;
+    storage?: string;
+    shelf_life_days?: number;
+    halal?: boolean;
+}
+
+export interface Dimensions {
+    length: number;
+    width: number;
+    height: number;
+}
+
+export interface ProductListResponse {
+    items: Product[];
+    pagination: Pagination;
+}
+
+export interface Pagination {
+    page: number;
+    limit: number;
+    total: number;
+}
+
+export interface ProductReview {
+    reviewerName: string;
+    reviewerEmail: string;
+    rating: number;
+    comment: string;
+    date: string;
+}
+
+export async function fetchProducts(limit: number, skip: number, q?: string): Promise<ProductListResponse> {
     const logger = defaultLogger.withContext({
         component: 'products.api',
         action: 'fetchProducts',
@@ -75,14 +102,14 @@ export async function fetchProducts(limit: number, skip: number, q?: string): Pr
     return handleAsyncError(
         catalogClient.get(route, { params })
             .then(({ data }) => {
-                logger.info('Products fetched successfully', { count: data.products?.length })
-                return data
+                logger.info('Products fetched successfully', { count: data.items?.length })
+                return data as ProductListResponse
             }),
         'Failed to fetch products'
     )
 }
 
-export async function fetchProduct(id: number): Promise<ProductDetails> {
+export async function fetchProduct(id: string): Promise<Product> {
     const logger = defaultLogger.withContext({
         component: 'products.api',
         action: 'fetchProduct',
@@ -95,7 +122,7 @@ export async function fetchProduct(id: number): Promise<ProductDetails> {
         catalogClient.get(API_ROUTES.PRODUCTS.DETAILS(id))
             .then(({ data }) => {
                 logger.info('Product details fetched successfully')
-                return data
+                return data as Product
             }),
         'Failed to fetch product details'
     )
@@ -137,7 +164,7 @@ export async function fetchProductBrands(): Promise<string[]> {
     )
 }
 
-export async function fetchProductReviews(productId: number): Promise<ProductDetails['reviews']> {
+export async function fetchProductReviews(productId: string): Promise<ProductReview[]> {
     const logger = defaultLogger.withContext({
         component: 'products.api',
         action: 'fetchProductReviews',
@@ -150,7 +177,7 @@ export async function fetchProductReviews(productId: number): Promise<ProductDet
         catalogClient.get(API_ROUTES.PRODUCTS.REVIEWS(productId))
             .then(({ data }) => {
                 logger.info('Product reviews fetched successfully')
-                return data
+                return data as ProductReview[]
             }),
         'Failed to fetch product reviews'
     )

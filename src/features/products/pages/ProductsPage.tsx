@@ -23,8 +23,8 @@ export default function ProductsPage() {
         queryFn: () => fetchProducts(LIMIT, page * LIMIT, query),
     });
 
-    const products = data?.products ?? [];
-    const total = data?.total ?? 0;
+    const products = data?.items ?? [];
+    const total = data?.pagination.total ?? 0;
     const totalPages = Math.ceil(total / LIMIT);
     const hasPrev = page > 0;
     const hasNext = page + 1 < totalPages;
@@ -72,18 +72,18 @@ export default function ProductsPage() {
                                                 <CardHeader className="p-0">
                                                     <div className="aspect-square w-full overflow-hidden rounded-t-xl">
                                                         <img
-                                                            src={product.thumbnail}
-                                                            alt={product.title}
+                                                            src={product.images?.[0] || ""}
+                                                            alt={product.name}
                                                             className="h-full w-full object-contain"
                                                         />
                                                     </div>
                                                 </CardHeader>
                                                 <CardContent className="p-4">
                                                     <CardTitle className="text-base">
-                                                        {product.title}
+                                                        {product.name}
                                                     </CardTitle>
                                                     <p className="text-sm text-muted-foreground">
-                                                        ${product.price}
+                                                        {product.base_price} {product.currency}
                                                     </p>
                                                 </CardContent>
                                             </Card>
