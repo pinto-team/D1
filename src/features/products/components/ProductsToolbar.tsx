@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { RefreshCw, LayoutGrid, List, Search, Plus } from "lucide-react";
 import { useI18n } from "@/shared/hooks/useI18n";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/app/routes/routes";
 
 type Props = {
     query: string; onQuery: (v: string) => void;
@@ -25,9 +27,11 @@ export function ProductsToolbar(p: Props) {
                     <p className="mt-1 text-sm text-muted-foreground">{p.subtitle}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="default" size="sm" onClick={() => alert("Add Product")}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        {t("products.add")}
+                    <Button variant="default" size="sm" asChild>
+                        <Link to={ROUTES.PRODUCT_ADD}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            {t("products.add")}
+                        </Link>
                     </Button>
                     <Button variant="outline" size="icon" onClick={p.onRefresh} disabled={p.isRefreshing}>
                         <RefreshCw className={`h-4 w-4 ${p.isRefreshing ? "animate-spin" : ""}`} />

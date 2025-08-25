@@ -8,6 +8,7 @@ import ProductDetailsPage from "@/features/products/pages/ProductDetailsPage"
 import ProtectedRoute from "./ProtectedRoute"
 import NotFound from "./NotFound"
 import { ROUTES } from "@/app/routes/routes"
+import AddProductPage from "@/features/products/pages/AddProductPage"
 
 export const router = createBrowserRouter([
     {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
                     { index: true, element: <DashboardPage /> },               // پیش‌فرض = داشبورد
                     { path: ROUTES.DASHBOARD, element: <DashboardPage /> },    // مسیر /dashboard
                     { path: ROUTES.PRODUCTS, element: <ProductsPage /> },      // مسیر /products
+                    { path: ROUTES.PRODUCT_ADD, element: <AddProductPage /> }, // مسیر /products/add
                     { path: ROUTES.PRODUCT_DETAILS, element: <ProductDetailsPage /> }, // مسیر /products/:id
                 ],
             },

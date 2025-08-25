@@ -5,4 +5,5 @@ export const ROUTES = {
     DASHBOARD: "/dashboard",
     PRODUCTS: "/products",
     PRODUCT_DETAILS: "/products/:id",
+    PRODUCT_ADD: "/products/add",
 } as const

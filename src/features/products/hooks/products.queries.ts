@@ -5,9 +5,13 @@ import {
     fetchProduct, 
     fetchProductCategories, 
     fetchProductBrands,
-    fetchProductReviews 
+    fetchProductReviews,
+    createProduct,
+    type AddProductRequest,
+    type Product,
 } from '../services/products.api'
 import { defaultLogger } from '@/shared/lib/logger'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 // Query keys
 export const productsQueryKeys = {
@@ -124,6 +128,27 @@ export function useProductReviews(productId: string) {
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
         enabled: !!productId,
+    })
+}
+
+// New: Create product mutation
+export function useCreateProduct() {
+    const queryClient = useQueryClient()
+    const logger = defaultLogger.withContext({
+        component: 'products.queries',
+        action: 'useCreateProduct',
+    })
+
+    return useMutation({
+        mutationFn: (payload: AddProductRequest) => {
+            logger.info('Mutating: create product')
+            return createProduct(payload)
+        },
+        onSuccess: (created: Product) => {
+            logger.info('Product created (mutation) - invalidating lists', { id: created.id })
+            // Invalidate product lists
+            queryClient.invalidateQueries({ queryKey: productsQueryKeys.lists() })
+        },
     })
 }
 
