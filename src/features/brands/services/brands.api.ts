@@ -41,6 +41,9 @@ export interface Pagination {
     page: number;
     limit: number;
     total: number;
+    total_pages?: number;
+    has_next?: boolean;
+    has_previous?: boolean;
 }
 
 /** List response for brands (aligned with products list shape) */
@@ -64,9 +67,27 @@ interface UploadFilesResponse {
 /** Query params for listing brands */
 type BrandListParams = Readonly<{
     limit: number;
-    skip: number;
+    page: number;
     q?: string;
 }>;
+
+// New API success response shape for listing brands
+interface BrandListSuccessResponse {
+    data: Brand[];
+    meta: {
+        message: string;
+        status: "success";
+        code: string;
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
+    };
+}
 
 /**
  * Fetch paginated brands list
@@ -77,7 +98,7 @@ type BrandListParams = Readonly<{
  */
 export async function fetchBrands(
     limit: number,
-    skip: number,
+    page: number,
     q?: string,
     signal?: AbortSignal
 ): Promise<BrandListResponse> {
@@ -85,7 +106,7 @@ export async function fetchBrands(
         component: "brands.api",
         action: "fetchBrands",
         limit,
-        skip,
+        page,
         q,
     });
     logger.info("Fetching brands list");
@@ -97,17 +118,29 @@ export async function fetchBrands(
 
     const params: BrandListParams = {
         limit: Math.max(1, limit),
-        skip: Math.max(0, skip),
+        page: Math.max(1, page),
         ...(q && q.trim() ? { q } : {}),
     };
 
     return handleAsyncError(
         catalogClient
-            .get<BrandListResponse>(API_ROUTES.BRANDS.LIST, { params, signal, timeout: 10000 })
+            .get<BrandListSuccessResponse>(API_ROUTES.BRANDS.LIST, { params, signal, timeout: 10000 })
             .then(({ data }) => {
-                console.log("Raw server response:", data); // برای دیباگ
-                logger.info("Brands fetched", { count: data?.items?.length, rawData: data });
-                return data;
+                const items = data?.data ?? [];
+                const p = data?.meta?.pagination;
+                const mapped: BrandListResponse = {
+                    items,
+                    pagination: {
+                        page: p?.page ?? params.page,
+                        limit: p?.limit ?? params.limit,
+                        total: p?.total ?? items.length,
+                        total_pages: p?.total_pages,
+                        has_next: p?.has_next,
+                        has_previous: p?.has_previous,
+                    },
+                };
+                logger.info("Brands fetched", { count: mapped.items.length, pagination: mapped.pagination });
+                return mapped;
             }),
         "Failed to fetch brands"
     );
@@ -139,12 +172,9 @@ export async function createBrand(payload: CreateBrandRequest, signal?: AbortSig
     const logger = defaultLogger.withContext({ component: "brands.api", action: "createBrand", name: payload.name });
     logger.info("Creating brand");
 
-    return handleAsyncError(
-        catalogClient
-            .post<Brand>(API_ROUTES.BRANDS.CREATE, payload, { signal })
-            .then(({ data }) => data),
-        "Failed to create brand"
-    );
+    // Let Axios errors propagate (needed to surface 422 validation errors to UI)
+    const { data } = await catalogClient.post<Brand>(API_ROUTES.BRANDS.CREATE, payload, { signal });
+    return data;
 }
 
 /**
@@ -161,12 +191,9 @@ export async function updateBrand(
     const logger = defaultLogger.withContext({ component: "brands.api", action: "updateBrand", id });
     logger.info("Updating brand");
 
-    return handleAsyncError(
-        catalogClient
-            .patch<Brand>(API_ROUTES.BRANDS.UPDATE(id), payload, { signal })
-            .then(({ data }) => data),
-        "Failed to update brand"
-    );
+    // Let Axios errors propagate (needed to surface 422 validation errors to UI)
+    const { data } = await catalogClient.patch<Brand>(API_ROUTES.BRANDS.UPDATE(id), payload, { signal });
+    return data;
 }
 
 /**

@@ -28,7 +28,7 @@ import { defaultLogger } from "@/shared/lib/logger";
 /** Filters used for list queries */
 export type BrandListFilters = Readonly<{
     limit: number;
-    skip: number;
+    page: number; // 1-based page index as per backend
     q?: string;
 }>;
 
@@ -48,26 +48,26 @@ export const brandsQueryKeys = {
  */
 export function useBrands(
     limit: number,
-    skip: number,
+    page: number,
     q?: string
 ): UseQueryResult<Awaited<ReturnType<typeof fetchBrands>>> {
     const logger = defaultLogger.withContext({
         component: "brands.queries",
         action: "useBrands",
         limit,
-        skip,
+        page,
         q,
     });
 
     return useQuery({
-        queryKey: brandsQueryKeys.list({ limit, skip, q }),
+        queryKey: brandsQueryKeys.list({ limit, page, q }),
         queryFn: ({ signal }) => {
             logger.info("Query: fetch brands");
-            return fetchBrands(limit, skip, q, signal);
+            return fetchBrands(limit, page, q, signal);
         },
         staleTime: 2 * 60_000, // 2 دقیقه
         gcTime: 5 * 60_000, // 5 دقیقه
-        enabled: limit > 0,
+        enabled: limit > 0 && page > 0,
         retry: 1, // یک بار تلاش مجدد
         placeholderData: keepPreviousData,
     });

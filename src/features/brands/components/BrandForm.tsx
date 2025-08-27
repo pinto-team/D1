@@ -24,18 +24,18 @@ function isLenientValidUrl(value: string): true | string {
 
 type Props = Readonly<{
     defaultValues?: Partial<CreateBrandRequest>
-    onSubmit: (values: CreateBrandRequest) => void
+    onSubmit: (data: CreateBrandRequest) => void
     submitting?: boolean
-    submitLabel?: string
     formId?: string
+    apiErrors?: ReadonlyArray<{ field: string; message: string }>
 }>
 
 export default function BrandForm({
                                       defaultValues,
                                       onSubmit,
                                       submitting = false,
-                                      submitLabel,
                                       formId = "brand-form",
+                                      apiErrors,
                                   }: Props): JSX.Element {
     const { t } = useI18n()
 
@@ -45,6 +45,7 @@ export default function BrandForm({
         setValue,
         watch,
         formState: { errors },
+        setError,
     } = useForm<CreateBrandRequest>({
         defaultValues: {
             name: "",
@@ -58,6 +59,17 @@ export default function BrandForm({
     })
 
     const logoUrl = watch("logo_url")
+
+    // Apply server-side validation errors from API (422)
+    React.useEffect(() => {
+        if (!apiErrors || apiErrors.length === 0) return
+        apiErrors.forEach(err => {
+            const path = err.field?.split(".")?.pop() ?? err.field
+            if (path === "name" || path === "description" || path === "country" || path === "website" || path === "logo_url") {
+                setError(path as keyof CreateBrandRequest, { type: "server", message: err.message })
+            }
+        })
+    }, [apiErrors, setError])
 
     return (
         <form
@@ -129,7 +141,7 @@ export default function BrandForm({
                                     aria-invalid={Boolean(errors.website)}
                                     {...register("website", {
                                         validate: (v) => {
-                                            const res = isLenientValidUrl(v)
+                                            const res = isLenientValidUrl(v ?? "")
                                             return res === true ? true : (t(res) ?? "Invalid URL")
                                         },
                                         maxLength: { value: 2048, message: t("validation.max_length", { n: 2048 }) ?? "Too long" },
