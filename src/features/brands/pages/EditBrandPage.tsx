@@ -8,6 +8,9 @@ import BrandForm from "../components/BrandForm"
 import { useBrand, useUpdateBrand, useDeleteBrand } from "../hooks/brands.queries"
 import { Button } from "@/components/ui/button"
 import type {Brand, CreateBrandRequest} from "../services/brands.api"
+import { ArrowLeft, ArrowRight } from "lucide-react"
+import { useI18n } from "@/shared/hooks/useI18n"
+import { ROUTES } from "@/app/routes/routes"
 
 function brandToFormDefaults(b?: Brand): Partial<CreateBrandRequest> {
     if (!b) return {}
@@ -26,6 +29,9 @@ export default function EditBrandPage() {
     const { data, isLoading } = useBrand(id)
     const update = useUpdateBrand(id)
     const del = useDeleteBrand()
+    const { t, locale } = useI18n()
+    const rtl = (locale?.toLowerCase?.() ?? "").startsWith("fa")
+    const [apiErrors, setApiErrors] = React.useState<ReadonlyArray<{ field: string; message: string }>>([])
 
     return (
         <SidebarProvider style={{"--sidebar-width":"calc(var(--spacing)*72)","--header-height":"calc(var(--spacing)*12)"} as React.CSSProperties}>
@@ -34,33 +40,64 @@ export default function EditBrandPage() {
                 <SiteHeader />
                 <div className="flex-1 p-6 md:p-8 lg:p-10">
                     <div className="mb-6 flex items-center justify-between">
-                        <h1 className="text-2xl font-bold">ویرایش برند</h1>
-                        <Button
-                            variant="destructive"
-                            onClick={() =>
-                                del.mutate(id, {
-                                    onSuccess: () => { toast.success("برند حذف شد"); navigate("/brands") },
-                                    onError: () => toast.error("حذف ناموفق بود")
-                                })
-                            }
-                        >
-                            حذف
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="shadow-none"
+                                onClick={() => navigate(-1)}
+                                aria-label={t("common.back") ?? "Back"}
+                                title={t("common.back") ?? "Back"}
+                            >
+                                {rtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+                            </Button>
+                            <h1 className="text-2xl font-bold">{t("brands.edit") ?? "Edit Brand"}</h1>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="submit"
+                                form="brand-form"
+                                disabled={update.isPending}
+                            >
+                                {update.isPending ? (t("common.saving") ?? "Saving...") : (t("common.save") ?? "Save")}
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={() =>
+                                    del.mutate(id, {
+                                        onSuccess: () => { toast.success(t("brands.deleted") ?? "Brand deleted"); navigate(ROUTES.BRANDS) },
+                                        onError: () => toast.error(t("common.error") ?? "Error"),
+                                    })
+                                }
+                            >
+                                {t("brands.actions.delete") ?? "Delete"}
+                            </Button>
+                        </div>
                     </div>
 
                     {isLoading || !data ? (
                         <div className="text-sm text-muted-foreground">در حال بارگذاری...</div>
                     ) : (
                         <BrandForm
-                            defaultValues={brandToFormDefaults(data)} // ✅ حالا بدون any
+                            defaultValues={brandToFormDefaults(data)}
                             onSubmit={(values) => {
+                                setApiErrors([])
                                 update.mutate(values, {
-                                    onSuccess: () => toast.success("تغییرات ذخیره شد"),
-                                    onError: () => toast.error("ذخیره ناموفق بود"),
+                                    onSuccess: () => toast.success(t("brands.saved_success") ?? "Brand saved successfully"),
+                                    onError: (err) => {
+                                        const resp = (err as { response?: { data?: unknown } }).response?.data as
+                                            | { code?: number; errors?: Array<{ field: string; message: string }> }
+                                            | undefined
+                                        if (resp?.code === 422 && Array.isArray(resp.errors)) {
+                                            setApiErrors(resp.errors)
+                                        } else {
+                                            toast.error(t("common.error") ?? "Error")
+                                        }
+                                    },
                                 })
                             }}
                             submitting={update.isPending}
-                            submitLabel="ذخیره تغییرات"
+                            apiErrors={apiErrors}
                         />
                     )}
                 </div>

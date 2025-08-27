@@ -9,9 +9,9 @@ import { useI18n } from "@/shared/hooks/useI18n"
 import { isRTLLocale } from "@/shared/i18n/utils"
 import { ROUTES } from "@/app/routes/routes"
 import BrandForm from "@/features/brands/components/BrandForm"
-import ResultDialog from "@/features/brands/components/ResultDialog"
 import { useCreateBrand } from "@/features/brands/hooks/brands.queries"
 import type { CreateBrandRequest } from "@/features/brands/services/brands.api"
+import { toast } from "sonner"
 import {JSX} from "react";
 
 const FORM_ID = "brand-form"
@@ -22,32 +22,27 @@ export default function AddBrandPage(): JSX.Element {
     const rtl = isRTLLocale(locale)
     const create = useCreateBrand()
 
-    const [dialogOpen, setDialogOpen] = React.useState(false)
-    const [dialogState, setDialogState] = React.useState<{
-        variant: "success" | "error"
-        title: string
-        message: string
-        createdId?: string
-    }>({ variant: "success", title: "", message: "" })
+    const [apiErrors, setApiErrors] = React.useState<ReadonlyArray<{ field: string; message: string }>>([])
 
     function handleSubmit(values: CreateBrandRequest) {
+        setApiErrors([])
         create.mutate(values, {
             onSuccess: (created) => {
-                setDialogState({
-                    variant: "success",
-                    title: t("brands.dialog.created_title") ?? "Brand created",
-                    message: t("brands.dialog.created_body") ?? "The brand was created successfully.",
-                    createdId: created.id,
-                })
-                setDialogOpen(true)
+                const msg = t("brands.saved_success") ?? "Brand saved successfully"
+                toast.success(msg)
+                navigate(ROUTES.BRAND_EDIT(created.id))
             },
-            onError: () => {
-                setDialogState({
-                    variant: "error",
-                    title: t("brands.dialog.error_title") ?? "Failed to create",
-                    message: t("brands.dialog.error_body") ?? "Something went wrong. Please try again.",
-                })
-                setDialogOpen(true)
+            onError: (err) => {
+                // Try to extract validation errors
+                const resp = (err as { response?: { data?: unknown } }).response?.data as
+                    | { code?: number; errors?: Array<{ field: string; message: string }> }
+                    | undefined
+                if (resp?.code === 422 && Array.isArray(resp.errors)) {
+                    setApiErrors(resp.errors)
+                } else {
+                    const msg = t("common.error") ?? "Something went wrong"
+                    toast.error(msg)
+                }
             },
         })
     }
@@ -92,45 +87,10 @@ export default function AddBrandPage(): JSX.Element {
                         formId={FORM_ID}
                         onSubmit={handleSubmit}
                         submitting={create.isPending}
+                        apiErrors={apiErrors}
                     />
                 </div>
             </SidebarInset>
-
-            {/* Result dialog */}
-            <ResultDialog
-                open={dialogOpen}
-                variant={dialogState.variant}
-                title={dialogState.title}
-                description={dialogState.message}
-                onOpenChange={setDialogOpen}
-                actions={
-                    dialogState.variant === "success"
-                        ? [
-                            {
-                                label: t("brands.dialog.view_brand") ?? "View brand",
-                                onClick: () => {
-                                    setDialogOpen(false)
-                                    if (dialogState.createdId) {
-                                        navigate(ROUTES.BRAND_EDIT(dialogState.createdId))
-                                    }
-                                },
-                            },
-                            {
-                                label: t("brands.dialog.add_another") ?? "Add another",
-                                onClick: () => {
-                                    setDialogOpen(false)
-                                    navigate(ROUTES.BRAND_NEW)
-                                },
-                            },
-                        ]
-                        : [
-                            {
-                                label: t("common.close") ?? "Close",
-                                onClick: () => setDialogOpen(false),
-                            },
-                        ]
-                }
-            />
         </SidebarProvider>
     )
 }

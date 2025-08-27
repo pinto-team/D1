@@ -27,17 +27,21 @@ export default function BrandsPage(): JSX.Element {
     const { t } = useI18n();
     const navigate = useNavigate();
 
-    const [page, setPage] = useState<number>(0);
-    const [pageSize, setPageSize] = useState<number>(12);
+    const [page, setPage] = useState<number>(0); // 0-based UI page
+    const [pageSize] = useState<number>(12);
     const [query, setQuery] = useState<string>("");
     const debouncedQuery = useDebounced(query, 450);
 
-    const { data, isLoading, error, refetch } = useBrands(pageSize, page * pageSize, debouncedQuery);
+    const { data, isLoading, error, refetch } = useBrands(pageSize, page + 1, debouncedQuery);
     const items = data?.items ?? [];
     const total = data?.pagination?.total ?? items.length;
-    const totalPages = useMemo<number>(() => Math.max(1, Math.ceil(total / pageSize)), [total, pageSize]);
-    const hasPrev = page > 0;
-    const hasNext = items.length === pageSize;
+    const totalPagesFromApi = data?.pagination?.total_pages;
+    const totalPages = useMemo<number>(
+        () => Math.max(1, totalPagesFromApi ?? Math.ceil(total / pageSize)),
+        [totalPagesFromApi, total, pageSize]
+    );
+    const hasPrev = data?.pagination?.has_previous ?? page > 0;
+    const hasNext = data?.pagination?.has_next ?? page + 1 < totalPages;
 
     const deleteMutation = useDeleteBrand();
 
