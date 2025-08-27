@@ -1,20 +1,19 @@
-
-import * as React from "react";
-import { useMemo } from "react";
+// src/components/layout/app-sidebar.tsx
+import * as React from "react"
+import { useMemo } from "react"
 import {
     ChevronDown,
     CircleUser,
     DollarSignIcon,
     NotebookIcon,
-    Package,
     Settings as SettingsIcon,
     ShoppingBagIcon,
     Store,
     Truck,
     Warehouse,
-} from "lucide-react";
-import { NavLink } from "react-router-dom";
-import { IconInnerShadowTop } from "@tabler/icons-react";
+} from "lucide-react"
+import { NavLink } from "react-router-dom"
+import { IconInnerShadowTop } from "@tabler/icons-react"
 import {
     Sidebar,
     SidebarContent,
@@ -29,24 +28,33 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
-} from "@/components/ui/sidebar.tsx";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible.tsx";
-import { NavUser } from "@/components/layout/nav-user.tsx";
-import { useI18n } from "@/shared/hooks/useI18n.ts";
-import { useAuth } from "@/features/auth/hooks/useAuth.ts";
-import { isRTLLocale, getSidebarSide } from "@/shared/i18n/utils.ts";
-import { ROUTES } from "@/app/routes/routes";
+} from "@/components/ui/sidebar.tsx"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible.tsx"
+import { NavUser } from "@/components/layout/nav-user.tsx"
+import { useI18n } from "@/shared/hooks/useI18n.ts"
+import { useAuth } from "@/features/auth/hooks/useAuth.ts"
+import { isRTLLocale, getSidebarSide } from "@/shared/i18n/utils.ts"
+import { ROUTES } from "@/app/routes/routes.ts"
 
-type TranslateFn = (key: string) => string;
-type MenuChild = { titleKey: string; url: string };
+type TranslateFn = (key: string) => string
+
+type MenuChild = {
+    titleKey: string
+    url: string
+}
+
 type MenuItem = {
-    titleKey: string;
-    url?: string;
-    icon: React.ComponentType<{ className?: string }>;
-    children?: MenuChild[];
-};
+    titleKey: string
+    url?: string
+    icon: React.ComponentType<{ className?: string }>
+    children?: MenuChild[]
+}
 
+// ======================
+// Menu Schema (raw keys)
+// ======================
 const itemsSchema: MenuItem[] = [
+
     {
         titleKey: "menu.orders",
         icon: ShoppingBagIcon,
@@ -104,32 +112,36 @@ const itemsSchema: MenuItem[] = [
             { titleKey: "menu.reports.topProducts", url: "#reports-top-products" },
         ],
     },
+    // 🔹 اطلاعات پایه (Master Data)
     {
-        titleKey: "menu.products",
-        icon: Package,
-        url: ROUTES.PRODUCTS,
-    },
-    {
-        titleKey: "menu.settings",
+        titleKey: "menu.basic",
         icon: SettingsIcon,
         children: [
-            { titleKey: "menu.settings.shippingRate", url: "#settings-shipping-rate" },
-            { titleKey: "menu.settings.addProducts", url: "#settings-add-products" },
+            { titleKey: "menu.basic.products", url: ROUTES.PRODUCTS },      // /products
+            { titleKey: "menu.basic.categories", url: ROUTES.CATEGORIES },  // /categories
+            { titleKey: "menu.basic.brands", url: ROUTES.BRANDS },          // /brands
         ],
     },
-];
 
+]
+
+// ================
+// helpers
+// ================
 const translateItems = (items: MenuItem[], t: TranslateFn) =>
     items.map((item) => ({
         ...item,
         title: t(item.titleKey),
         children: item.children?.map((child) => ({ ...child, title: t(child.titleKey) })) ?? [],
-    }));
+    }))
 
 function MenuSection({
                          label,
                          items,
-                     }: { label: string; items: ReturnType<typeof translateItems> }) {
+                     }: {
+    label: string
+    items: ReturnType<typeof translateItems>
+}) {
     return (
         <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/70 text-start">
@@ -137,7 +149,7 @@ function MenuSection({
             </SidebarGroupLabel>
             <SidebarGroupContent>
                 <SidebarMenu>
-                    {items.map((item) => (
+                    {items.map((item) =>
                         item.children.length > 0 ? (
                             <Collapsible key={item.titleKey} className="group/collapsible">
                                 <SidebarMenuItem>
@@ -150,15 +162,15 @@ function MenuSection({
                                     </CollapsibleTrigger>
                                     <CollapsibleContent className="data-[state=closed]:hidden">
                                         <SidebarMenuSub>
-                                            {item.children.map((subItem, index) => (
-                                                <SidebarMenuSubItem key={`${item.titleKey}-${subItem.url}-${index}`}>
+                                            {item.children.map((subItem) => (
+                                                <SidebarMenuSubItem key={`${item.titleKey}-${subItem.url}`}>
                                                     <SidebarMenuSubButton asChild>
-                                                        <a
-                                                            href={subItem.url}
+                                                        <NavLink
+                                                            to={subItem.url}
                                                             className="w-full text-sidebar-foreground/90 hover:text-sidebar-foreground text-start ps-6"
                                                         >
                                                             <span>{subItem.title}</span>
-                                                        </a>
+                                                        </NavLink>
                                                     </SidebarMenuSubButton>
                                                 </SidebarMenuSubItem>
                                             ))}
@@ -176,16 +188,19 @@ function MenuSection({
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         )
-                    ))}
+                    )}
                 </SidebarMenu>
             </SidebarGroupContent>
         </SidebarGroup>
-    );
+    )
 }
 
+// ================
+// Component
+// ================
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
-    const { t, locale } = useI18n();
-    const { user: authUser, logout } = useAuth();
+    const { t, locale } = useI18n()
+    const { user: authUser, logout } = useAuth()
 
     const user = authUser
         ? {
@@ -197,11 +212,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             name: t("guest"),
             email: "",
             avatar: "/avatars/placeholder.png",
-        };
+        }
 
-    const isRTL = isRTLLocale(locale);
-    const side = getSidebarSide(locale);
-    const items = useMemo(() => translateItems(itemsSchema, t), [t]);
+    const isRTL = isRTLLocale(locale)
+    const side = getSidebarSide(locale)
+    const items = useMemo(() => translateItems(itemsSchema, t), [t])
 
     return (
         <Sidebar collapsible="offcanvas" side={side} dir={isRTL ? "rtl" : "ltr"} {...props}>
@@ -226,5 +241,5 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <NavUser user={user} onLogout={logout} />
             </SidebarFooter>
         </Sidebar>
-    );
+    )
 }

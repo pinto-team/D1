@@ -93,6 +93,16 @@ export const API_ROUTES = {
         NOTIFICATIONS: '/settings/notifications',
         SECURITY: '/settings/security',
     },
+
+    BRANDS: {
+        LIST: '/brands',
+        SEARCH: '/brands',
+        CREATE: '/brands',
+        DETAILS: (id: string) => `/brands/${id}`,
+        UPDATE: (id: string) => `/brands/${id}`,
+        DELETE: (id: string) => `/brands/${id}`,
+    },
+
 } as const
 
 export type ApiRoute = typeof API_ROUTES

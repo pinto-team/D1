@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AppSidebar } from "@/features/sidebar/app-sidebar.tsx";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useI18n } from "@/shared/hooks/useI18n";

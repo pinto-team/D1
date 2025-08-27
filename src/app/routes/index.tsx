@@ -1,14 +1,22 @@
-// @/app/routes/index.tsx
 import { createBrowserRouter } from "react-router-dom"
 import AppRoot from "@/app/App"
+
 import LoginPage from "@/features/auth/pages/LoginPage"
 import DashboardPage from "@/features/dashboard/pages/DashboardPage"
+
+// Products
 import ProductsPage from "@/features/products/pages/ProductsPage"
 import ProductDetailsPage from "@/features/products/pages/ProductDetailsPage"
+import AddProductPage from "@/features/products/pages/AddProductPage"
+
+// Brands
+import BrandsPage from "@/features/brands/pages/BrandsPage"
+import AddBrandPage from "@/features/brands/pages/AddBrandPage"
+import EditBrandPage from "@/features/brands/pages/EditBrandPage"
+
 import ProtectedRoute from "./ProtectedRoute"
 import NotFound from "./NotFound"
 import { ROUTES } from "@/app/routes/routes"
-import AddProductPage from "@/features/products/pages/AddProductPage"
 
 export const router = createBrowserRouter([
     {
@@ -18,11 +26,18 @@ export const router = createBrowserRouter([
             {
                 element: <ProtectedRoute />,
                 children: [
-                    { index: true, element: <DashboardPage /> },               // پیش‌فرض = داشبورد
-                    { path: ROUTES.DASHBOARD, element: <DashboardPage /> },    // مسیر /dashboard
-                    { path: ROUTES.PRODUCTS, element: <ProductsPage /> },      // مسیر /products
-                    { path: ROUTES.PRODUCT_ADD, element: <AddProductPage /> }, // مسیر /products/add
-                    { path: ROUTES.PRODUCT_DETAILS, element: <ProductDetailsPage /> }, // مسیر /products/:id
+                    { index: true, element: <DashboardPage /> },                      // پیش‌فرض = داشبورد
+                    { path: ROUTES.DASHBOARD, element: <DashboardPage /> },           // /dashboard
+
+                    // Products
+                    { path: ROUTES.PRODUCTS, element: <ProductsPage /> },             // /products
+                    { path: ROUTES.PRODUCT_ADD, element: <AddProductPage /> },        // /products/add
+                    { path: ROUTES.PRODUCT_DETAILS, element: <ProductDetailsPage />}, // /products/:id
+
+                    // Brands
+                    { path: ROUTES.BRANDS, element: <BrandsPage /> },                 // /brands
+                    { path: ROUTES.BRAND_NEW, element: <AddBrandPage /> },            // /brands/new
+                    { path: ROUTES.BRAND_EDIT(), element: <EditBrandPage /> },        // /brands/:id
                 ],
             },
             { path: ROUTES.LOGIN, element: <LoginPage /> },

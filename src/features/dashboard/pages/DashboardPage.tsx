@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/layout/app-sidebar.tsx"
+import { AppSidebar } from "@/features/sidebar/app-sidebar.tsx"
 import { ChartAreaInteractive } from "@/components/layout/chart-area-interactive.tsx"
 import { DataTable } from "@/components/layout/data-table.tsx"
 import { SectionCards } from "@/components/layout/section-cards.tsx"
