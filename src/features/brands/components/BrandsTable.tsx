@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/shared/hooks/useI18n"
 import { ROUTES } from "@/app/routes/routes"
-import type { Brand } from "../services/brands.api"
+import type { Brand } from "@/api/resources/brands"
 import {JSX} from "react";
 
 type Props = Readonly<{

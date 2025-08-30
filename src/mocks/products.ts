@@ -1,7 +1,7 @@
 // mocks/products.ts
 import { http, HttpResponse } from 'msw'
 import { API_ROUTES } from '@/shared/constants/apiRoutes'
-import type { AddProductRequest, Product } from '@/features/products/services/products.api'
+import type { ProductCreate as AddProductRequest, Product } from '@/api/resources/products'
 
 // Mock product data with new model
 const mockProducts: Product[] = [

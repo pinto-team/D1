@@ -11,8 +11,8 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useI18n } from "@/shared/hooks/useI18n";
 import { useForm, Controller } from "react-hook-form";
-import { useCreateProduct } from "../hooks/products.queries";
-import { type AddProductRequest } from "../services/products.api";
+import { useCreate as useCreateProduct } from "@/features/products/hooks";
+import { type ProductCreate as AddProductRequest, type Product } from "@/api/resources/products";
 import { toast } from "sonner";
 import { ROUTES } from "@/app/routes/routes";
 
@@ -35,7 +35,7 @@ export default function AddProductPage() {
 
     function onSubmit(values: AddProductRequest) {
         createMutation.mutate(values, {
-            onSuccess: (created) => {
+            onSuccess: (created: Product) => {
                 toast.success(t("products.add") + " موفق بود")
                 reset()
                 navigate(ROUTES.PRODUCT_DETAILS.replace(":id", created.id))
@@ -51,7 +51,7 @@ export default function AddProductPage() {
             <AppSidebar variant="inset" />
             <SidebarInset>
                 <SiteHeader />
-                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col @container/main gap-6 p-6 md:p-8 lg:p-10">
+                <form onSubmit={handleSubmit(onSubmit as any)} className="flex flex-1 flex-col @container/main gap-6 p-6 md:p-8 lg:p-10">
                     <div className="flex items-center justify-between">
                         <h1 className="text-3xl font-bold tracking-tight">{t("products.add")}</h1>
                         <div className="flex gap-2">
