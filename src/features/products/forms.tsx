@@ -58,7 +58,7 @@ type ProductFormProps = Readonly<{
 export function ProductFormRHF({ defaultValues, onSubmit, submitting, formId = "product-form" }: ProductFormProps) {
     const { t } = useI18n();
     const { register, control, handleSubmit, formState: { errors } } = useForm<ProductFormValues>({
-        resolver: zodResolver(productSchema),
+        resolver: zodResolver(productSchema) as any,
         defaultValues: {
             currency: "USD",
             min_order_quantity: 1,
@@ -72,7 +72,7 @@ export function ProductFormRHF({ defaultValues, onSubmit, submitting, formId = "
     });
 
     return (
-        <form id={formId} onSubmit={handleSubmit(values => onSubmit(values as ProductCreate))} className="flex flex-1 flex-col @container/main gap-6">
+        <form id={formId} onSubmit={handleSubmit(values => onSubmit(values as unknown as ProductCreate))} className="flex flex-1 flex-col @container/main gap-6">
             <div className="grid gap-6 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                     <CardHeader className="bg-muted/50">
