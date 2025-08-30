@@ -256,5 +256,14 @@
   "nav.documents.more": "More",
   "nav.documents.open": "Open",
   "nav.documents.share": "Share",
-  "nav.documents.delete": "Delete"
+  "nav.documents.delete": "Delete",
+
+  "categories.add": "Add Category",
+  "categories.created_success": "Category created successfully",
+  "categories.confirm_delete": "Are you sure you want to delete this category?",
+  "categories.form.title": "Category",
+  "categories.form.name": "Name",
+  "categories.form.name_ph": "e.g. Snacks",
+  "categories.table.name": "Name",
+  "categories.table.actions": "Actions"
 }

@@ -13,6 +13,8 @@ import AddProductPage from "@/features/products/pages/AddProductPage"
 import BrandsPage from "@/features/brands/pages/BrandsPage"
 import AddBrandPage from "@/features/brands/pages/AddBrandPage"
 import EditBrandPage from "@/features/brands/pages/EditBrandPage"
+import CategoriesPage from "@/features/categories/pages/CategoriesPage"
+import AddCategoryPage from "@/features/categories/pages/AddCategoryPage"
 
 import ProtectedRoute from "./ProtectedRoute"
 import NotFound from "./NotFound"
@@ -38,6 +40,10 @@ export const router = createBrowserRouter([
                     { path: ROUTES.BRANDS, element: <BrandsPage /> },                 // /brands
                     { path: ROUTES.BRAND_NEW, element: <AddBrandPage /> },            // /brands/new
                     { path: ROUTES.BRAND_EDIT(), element: <EditBrandPage /> },        // /brands/:id
+
+                    // Categories
+                    { path: ROUTES.CATEGORIES, element: <CategoriesPage /> },         // /categories
+                    { path: ROUTES.CATEGORIES + "/new", element: <AddCategoryPage /> },
                 ],
             },
             { path: ROUTES.LOGIN, element: <LoginPage /> },
