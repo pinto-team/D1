@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/app/routes/routes";
 import { useI18n } from "@/shared/hooks/useI18n";
 import type { Category } from "@/api/resources/categories";
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from "@tanstack/react-table";
@@ -9,6 +11,7 @@ type Props = Readonly<{ items: ReadonlyArray<Category>; onEdit?: (id: string) =>
 
 export default function CategoriesTable({ items, onEdit, onDelete }: Props) {
     const { t } = useI18n();
+    const navigate = useNavigate();
 
     const handleDelete = React.useCallback((id: string) => {
         if (!onDelete) return;
@@ -26,7 +29,7 @@ export default function CategoriesTable({ items, onEdit, onDelete }: Props) {
                 const c = row.original;
                 return (
                     <div className="text-right space-x-2 rtl:space-x-reverse">
-                        {onEdit && <Button size="sm" variant="outline" onClick={() => onEdit(c.id)}>{t("actions.edit")}</Button>}
+                        <Button size="sm" variant="outline" onClick={() => (onEdit ? onEdit(c.id) : navigate(`${ROUTES.CATEGORIES}/${c.id}`))}>{t("actions.edit")}</Button>
                         {onDelete && <Button size="sm" variant="destructive" onClick={() => handleDelete(c.id)}>{t("actions.delete")}</Button>}
                     </div>
                 );

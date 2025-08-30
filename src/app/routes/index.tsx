@@ -15,6 +15,7 @@ import AddBrandPage from "@/features/brands/pages/AddBrandPage"
 import EditBrandPage from "@/features/brands/pages/EditBrandPage"
 import CategoriesPage from "@/features/categories/pages/CategoriesPage"
 import AddCategoryPage from "@/features/categories/pages/AddCategoryPage"
+import EditCategoryPage from "@/features/categories/pages/EditCategoryPage"
 
 import ProtectedRoute from "./ProtectedRoute"
 import NotFound from "./NotFound"
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
                     // Categories
                     { path: ROUTES.CATEGORIES, element: <CategoriesPage /> },         // /categories
                     { path: ROUTES.CATEGORIES + "/new", element: <AddCategoryPage /> },
+                    { path: ROUTES.CATEGORIES + "/:id", element: <EditCategoryPage /> },
                 ],
             },
             { path: ROUTES.LOGIN, element: <LoginPage /> },
