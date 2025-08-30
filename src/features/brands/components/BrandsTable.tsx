@@ -1,13 +1,3 @@
-// src/features/brands/components/BrandsTable.tsx
-/**
- * BrandsTable
- * -----------
- * Presentational table for brand list with optional delete action.
- * - i18n-ready: all labels pulled from translation keys.
- * - ESLint/TS friendly: strict props typing, no `any`.
- * - Accessibility: image alt text, descriptive aria-labels, safe external links.
- */
-
 import * as React from "react"
 import { Link } from "react-router-dom"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -27,9 +17,12 @@ export default function BrandsTable({ items, onDelete }: Props): JSX.Element {
 
     const handleDelete = React.useCallback(
         (id: string) => {
-            onDelete?.(id)
+            if (!onDelete) return
+            const ok = window.confirm(t("brands.confirm_delete") ?? "Are you sure you want to delete this brand?")
+            if (!ok) return
+            onDelete(id)
         },
-        [onDelete]
+        [onDelete, t]
     )
 
     return (
@@ -65,10 +58,7 @@ export default function BrandsTable({ items, onDelete }: Props): JSX.Element {
                                             decoding="async"
                                         />
                                     ) : (
-                                        <div
-                                            className="h-10 w-10 rounded bg-muted"
-                                            aria-label={t("brands.no_logo") as string}
-                                        />
+                                        <div className="h-10 w-10 rounded bg-muted" aria-label={t("brands.no_logo") as string} />
                                     )}
                                 </TableCell>
 

@@ -1,3 +1,4 @@
+// features/brands/pages/EditBrandPage.tsx
 import * as React from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { AppSidebar } from "@/features/sidebar/app-sidebar.tsx"
@@ -7,10 +8,11 @@ import { toast } from "sonner"
 import BrandForm from "../components/BrandForm"
 import { useBrand, useUpdateBrand, useDeleteBrand } from "../hooks/brands.queries"
 import { Button } from "@/components/ui/button"
-import type {Brand, CreateBrandRequest} from "../services/brands.api"
+import type { Brand, CreateBrandRequest } from "../services/brands.api"
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { useI18n } from "@/shared/hooks/useI18n"
 import { ROUTES } from "@/app/routes/routes"
+import { defaultLogger } from "@/shared/lib/logger.ts"
 
 function brandToFormDefaults(b?: Brand): Partial<CreateBrandRequest> {
     if (!b) return {}
@@ -24,17 +26,56 @@ function brandToFormDefaults(b?: Brand): Partial<CreateBrandRequest> {
 }
 
 export default function EditBrandPage() {
-    const { id = "" } = useParams()
+    const { id: rawId } = useParams()
+    const id = (rawId || "").trim()
     const navigate = useNavigate()
-    const { data, isLoading } = useBrand(id)
+    const { data, isLoading, error } = useBrand(id)
     const update = useUpdateBrand(id)
     const del = useDeleteBrand()
     const { t, locale } = useI18n()
     const rtl = (locale?.toLowerCase?.() ?? "").startsWith("fa")
-    const [apiErrors, setApiErrors] = React.useState<ReadonlyArray<{ field: string; message: string }>>([])
+    const [apiErrors, setApiErrors] = React.useState<
+        ReadonlyArray<{ field: string; message: string }>
+    >([])
+
+    React.useEffect(() => {
+        if (isLoading) {
+            defaultLogger.info("Loading brand...", { id })
+            return
+        }
+        if (error) {
+            defaultLogger.error("Failed to load brand", { id, error: error.message })
+            return
+        }
+        if (data) {
+            defaultLogger.info("Brand loaded", { id: data.id, name: data.name })
+            console.log("Brand name:", data.name)
+        }
+    }, [data, isLoading, error, id])
+
+    const formDefaults = React.useMemo(() => brandToFormDefaults(data), [data])
+
+    const handleDelete = React.useCallback(() => {
+        if (!id) return
+        if (!window.confirm(t("brands.confirm_delete"))) return
+        del.mutate(id, {
+            onSuccess: () => {
+                toast.success(t("brands.deleted"))
+                navigate(ROUTES.BRANDS)
+            },
+            onError: () => toast.error(t("common.error")),
+        })
+    }, [del, id, navigate, t])
 
     return (
-        <SidebarProvider style={{"--sidebar-width":"calc(var(--spacing)*72)","--header-height":"calc(var(--spacing)*12)"} as React.CSSProperties}>
+        <SidebarProvider
+            style={
+                {
+                    "--sidebar-width": "calc(var(--spacing)*72)",
+                    "--header-height": "calc(var(--spacing)*12)",
+                } as React.CSSProperties
+            }
+        >
             <AppSidebar variant="inset" />
             <SidebarInset>
                 <SiteHeader />
@@ -46,12 +87,16 @@ export default function EditBrandPage() {
                                 variant="ghost"
                                 className="shadow-none"
                                 onClick={() => navigate(-1)}
-                                aria-label={t("common.back") ?? "Back"}
-                                title={t("common.back") ?? "Back"}
+                                aria-label={t("common.back")}
+                                title={t("common.back")}
                             >
-                                {rtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+                                {rtl ? (
+                                    <ArrowRight className="h-4 w-4" />
+                                ) : (
+                                    <ArrowLeft className="h-4 w-4" />
+                                )}
                             </Button>
-                            <h1 className="text-2xl font-bold">{t("brands.edit") ?? "Edit Brand"}</h1>
+                            <h1 className="text-2xl font-bold">{t("brands.edit")}</h1>
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
@@ -59,39 +104,42 @@ export default function EditBrandPage() {
                                 form="brand-form"
                                 disabled={update.isPending}
                             >
-                                {update.isPending ? (t("common.saving") ?? "Saving...") : (t("common.save") ?? "Save")}
+                                {update.isPending ? t("common.saving") : t("common.save")}
                             </Button>
-                            <Button
-                                variant="destructive"
-                                onClick={() =>
-                                    del.mutate(id, {
-                                        onSuccess: () => { toast.success(t("brands.deleted") ?? "Brand deleted"); navigate(ROUTES.BRANDS) },
-                                        onError: () => toast.error(t("common.error") ?? "Error"),
-                                    })
-                                }
-                            >
-                                {t("brands.actions.delete") ?? "Delete"}
+                            <Button variant="destructive" onClick={handleDelete}>
+                                {t("brands.actions.delete")}
                             </Button>
                         </div>
                     </div>
 
                     {isLoading || !data ? (
-                        <div className="text-sm text-muted-foreground">در حال بارگذاری...</div>
+                        <div className="text-sm text-muted-foreground">
+                            {t("common.loading")}
+                        </div>
                     ) : (
                         <BrandForm
-                            defaultValues={brandToFormDefaults(data)}
+                            key={data.id} // اطمینان از ری‌مونت زمانی که رکورد عوض می‌شود
+                            defaultValues={formDefaults}
                             onSubmit={(values) => {
                                 setApiErrors([])
                                 update.mutate(values, {
-                                    onSuccess: () => toast.success(t("brands.saved_success") ?? "Brand saved successfully"),
+                                    onSuccess: () => {
+                                        toast.success(t("brands.saved_success"))
+                                        navigate(ROUTES.BRANDS)
+                                    },
                                     onError: (err) => {
-                                        const resp = (err as { response?: { data?: unknown } }).response?.data as
-                                            | { code?: number; errors?: Array<{ field: string; message: string }> }
+                                        const resp = (
+                                            err as { response?: { data?: unknown } }
+                                        ).response?.data as
+                                            | {
+                                            code?: number
+                                            errors?: Array<{ field: string; message: string }>
+                                        }
                                             | undefined
                                         if (resp?.code === 422 && Array.isArray(resp.errors)) {
                                             setApiErrors(resp.errors)
                                         } else {
-                                            toast.error(t("common.error") ?? "Error")
+                                            toast.error(t("common.error"))
                                         }
                                     },
                                 })

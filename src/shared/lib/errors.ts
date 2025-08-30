@@ -35,11 +35,12 @@ export class AppError extends Error {
 
 // Specific error classes
 export class ValidationError extends AppError {
+    public readonly details?: Record<string, unknown>
+
     constructor(message: string, details?: Record<string, unknown>) {
         super(message, 400, 'VALIDATION_ERROR')
         this.details = details
     }
-    public readonly details?: Record<string, unknown>
 }
 
 export class AuthenticationError extends AppError {
@@ -133,6 +134,10 @@ export function handleAsyncError<T>(
 ): Promise<T> {
     return promise.catch((error) => {
         if (error instanceof AppError) {
+            throw error
+        }
+        // Ignore cancellation errors
+        if (error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError' || error?.message === 'canceled') {
             throw error
         }
 

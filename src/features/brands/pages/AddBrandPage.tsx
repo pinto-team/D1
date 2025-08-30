@@ -28,9 +28,11 @@ export default function AddBrandPage(): JSX.Element {
         setApiErrors([])
         create.mutate(values, {
             onSuccess: (created) => {
+                console.log("Brand")
+                console.log(created)
                 const msg = t("brands.saved_success") ?? "Brand saved successfully"
                 toast.success(msg)
-                navigate(ROUTES.BRAND_EDIT(created.id))
+                navigate(ROUTES.BRANDS)
             },
             onError: (err) => {
                 // Try to extract validation errors
