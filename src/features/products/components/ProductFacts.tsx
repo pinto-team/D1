@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tag, Package, Percent, ShoppingCart, CheckCircle, Scale, Ruler, Shield, Info, Truck, RotateCcw, Calendar, Barcode } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useI18n } from "@/shared/hooks/useI18n";
-import type { Product } from "../services/products.api";
+import type { Product } from "@/api/resources/products";
 
 export function ProductFacts({ product }: { product: Product }) {
     const { t } = useI18n();

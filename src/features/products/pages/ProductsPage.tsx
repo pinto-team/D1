@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useList as useProductList } from "@/features/products/hooks";
 import { AppSidebar } from "@/features/sidebar/app-sidebar.tsx";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useI18n } from "@/shared/hooks/useI18n";
-import { fetchProducts, type Product } from "../services/products.api";
+import type { Product } from "@/api/resources/products";
 
 import { ProductsToolbar } from "../components/ProductsToolbar";
 import { ProductsPagination } from "../components/ProductsPagination";
@@ -25,10 +25,7 @@ export default function ProductsPage() {
     const [sort, setSort] = useState<SortKey>("relevance");
     const debouncedQuery = useDebounced(query, 450);
 
-    const { data, isLoading, isError, refetch } = useQuery({
-        queryKey: ["products", page, debouncedQuery, pageSize],
-        queryFn: () => fetchProducts(pageSize, page * pageSize, debouncedQuery), // ✅ سه آرگومان
-    });
+    const { data, isLoading, isError, refetch } = useProductList({ limit: pageSize, page: page + 1, q: debouncedQuery });
 
     const products: Product[] = data?.items ?? [];
     const total = data?.pagination?.total ?? 0;

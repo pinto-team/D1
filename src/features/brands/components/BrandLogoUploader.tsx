@@ -10,7 +10,7 @@
 
 import * as React from "react"
 import { X, Loader2 } from "lucide-react"
-import { uploadSingleImage } from "../services/brands.api"
+import { uploadSingleImage } from "@/api/uploads"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"

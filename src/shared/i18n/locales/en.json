@@ -17,6 +17,8 @@
   "brands.deleted": "Brand deleted",
   "brands.add": "Add Brand",
   "brands.title": "Brands",
+  "brands.confirm_delete": "Are you sure you want to delete this brand?",
+  "brands.saved_success": "Brand saved successfully",
 
   "brands.form.logo_help": "Max size 5MB. Common image formats are supported.",
   "brands.form.country": "Country",
@@ -197,6 +199,13 @@
   "products.updated_at": "Updated at",
   "products.warranty": "Warranty",
   "products.weight": "Weight",
+  "products.name": "Name",
+  "products.purchase_price": "Purchase price",
+  "products.currency": "Currency",
+  "products.uom": "Unit",
+  "products.pack_size": "Pack size",
+  "products.case_size": "Case size",
+  "products.min_order_multiple": "Min multiple",
 
   "quickActions": "Quick Actions",
   "realtime": "Real-time",
@@ -243,10 +252,18 @@
   "pagination.last": "Last",
   "pagination.page_of": "Page {page} of {pages}",
 
-
   "nav.documents": "Documents",
   "nav.documents.more": "More",
   "nav.documents.open": "Open",
   "nav.documents.share": "Share",
-  "nav.documents.delete": "Delete"
+  "nav.documents.delete": "Delete",
+
+  "categories.add": "Add Category",
+  "categories.created_success": "Category created successfully",
+  "categories.confirm_delete": "Are you sure you want to delete this category?",
+  "categories.form.title": "Category",
+  "categories.form.name": "Name",
+  "categories.form.name_ph": "e.g. Snacks",
+  "categories.table.name": "Name",
+  "categories.table.actions": "Actions"
 }
