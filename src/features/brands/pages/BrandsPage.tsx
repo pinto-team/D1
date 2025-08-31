@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/shared/hooks/useI18n";
 import useDebounced from "@/shared/hooks/useDebounced";
 import { toast } from "sonner";
-import { useList as useBrandList, useRemove as useDeleteBrand, keys as brandKeys } from "@/features/brands/hooks";
+import { useBrands, useDeleteBrand } from "../hooks/brands.queries";
 import BrandsTable from "../components/BrandsTable";
 import { ROUTES } from "@/app/routes/routes";
 
@@ -32,7 +32,7 @@ export default function BrandsPage(): JSX.Element {
     const [query, setQuery] = useState<string>("");
     const debouncedQuery = useDebounced(query, 450);
 
-    const { data, isLoading, error, refetch } = useBrandList({ limit: pageSize, page: page + 1, q: debouncedQuery });
+    const { data, isLoading, error, refetch } = useBrands(pageSize, page + 1, debouncedQuery);
     const items = data?.items ?? [];
     const total = data?.pagination?.total ?? items.length;
     const totalPagesFromApi = data?.pagination?.total_pages;

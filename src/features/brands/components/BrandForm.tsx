@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import BrandLogoUploader from "./BrandLogoUploader"
 import { useI18n } from "@/shared/hooks/useI18n"
-import type { BrandCreate as CreateBrandRequest } from "@/api/resources/brands"
+import type { CreateBrandRequest } from "../services/brands.api"
 import { JSX } from "react"
 
 function normalizeUrl(value: string): string {

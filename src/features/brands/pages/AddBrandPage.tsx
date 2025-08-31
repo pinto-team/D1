@@ -8,9 +8,9 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 import { useI18n } from "@/shared/hooks/useI18n"
 import { isRTLLocale } from "@/shared/i18n/utils"
 import { ROUTES } from "@/app/routes/routes"
-import { BrandFormRHF } from "@/features/brands/forms"
-import { useCreate as useCreateBrand } from "@/features/brands/hooks"
-import type { BrandCreate as CreateBrandRequest } from "@/api/resources/brands"
+import BrandForm from "@/features/brands/components/BrandForm"
+import { useCreateBrand } from "@/features/brands/hooks/brands.queries"
+import type { CreateBrandRequest } from "@/features/brands/services/brands.api"
 import { toast } from "sonner"
 import {JSX} from "react";
 
@@ -85,10 +85,11 @@ export default function AddBrandPage(): JSX.Element {
                     </div>
 
                     {/* Form card */}
-                    <BrandFormRHF
+                    <BrandForm
                         formId={FORM_ID}
                         onSubmit={handleSubmit}
                         submitting={create.isPending}
+                        apiErrors={apiErrors}
                     />
                 </div>
             </SidebarInset>
