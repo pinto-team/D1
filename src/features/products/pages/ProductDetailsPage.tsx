@@ -1,11 +1,11 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useDetail as useProductDetail } from "@/features/products/hooks";
 import { AppSidebar } from "@/features/sidebar/app-sidebar.tsx";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useI18n } from "@/shared/hooks/useI18n";
-import { fetchProduct, type Product } from "../services/products.api";
+import type { Product } from "@/api/resources/products";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -18,11 +18,7 @@ export default function ProductDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const { data, isLoading, isError, refetch } = useQuery({
-        queryKey: ["product", id],
-        queryFn: () => fetchProduct(String(id)),
-        enabled: !!id,
-    });
+    const { data, isLoading, isError, refetch } = useProductDetail(String(id));
 
     const product = data as Product | undefined;
 

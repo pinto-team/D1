@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { Product } from "../services/products.api";
+import type { Product } from "@/api/resources/products";
 
 export function ProductRow({ product }: { product: Product }) {
     const price = product.base_price != null ? `${product.base_price} ${product.currency ?? ""}`.trim() : "";
