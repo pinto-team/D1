@@ -3,14 +3,7 @@ import * as React from "react"
 import { useMemo } from "react"
 import {
     ChevronDown,
-    CircleUser,
-    DollarSignIcon,
-    NotebookIcon,
     Settings as SettingsIcon,
-    ShoppingBagIcon,
-    Store,
-    Truck,
-    Warehouse,
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { IconInnerShadowTop } from "@tabler/icons-react"
@@ -54,71 +47,10 @@ type MenuItem = {
 // Menu Schema (raw keys)
 // ======================
 const itemsSchema: MenuItem[] = [
-
-    {
-        titleKey: "menu.orders",
-        icon: ShoppingBagIcon,
-        children: [
-            { titleKey: "menu.orders.active", url: "#orders-active" },
-            { titleKey: "menu.orders.history", url: "#orders-history" },
-        ],
-    },
-    {
-        titleKey: "menu.store",
-        icon: Store,
-        children: [
-            { titleKey: "menu.store.restaurants", url: "#store-restaurants" },
-            { titleKey: "menu.store.supermarket", url: "#store-supermarket" },
-        ],
-    },
-    {
-        titleKey: "menu.pinto",
-        icon: Warehouse,
-        children: [
-            { titleKey: "menu.pinto.max", url: "#pinto-max" },
-            { titleKey: "menu.pinto.eco", url: "#pinto-eco" },
-            { titleKey: "menu.pinto.pro", url: "#pinto-pro" },
-        ],
-    },
-    {
-        titleKey: "menu.users",
-        icon: CircleUser,
-        children: [
-            { titleKey: "menu.users.customers", url: "#users-customers" },
-            { titleKey: "menu.users.admins", url: "#users-admins" },
-        ],
-    },
-    {
-        titleKey: "menu.logistics",
-        icon: Truck,
-        children: [
-            { titleKey: "menu.logistics.motorcycle", url: "#logistics-motorcycle" },
-            { titleKey: "menu.logistics.van", url: "#logistics-van" },
-        ],
-    },
-    {
-        titleKey: "menu.finance",
-        icon: DollarSignIcon,
-        children: [
-            { titleKey: "menu.finance.dailySales", url: "#finance-daily-sales" },
-            { titleKey: "menu.finance.logisticsCosts", url: "#finance-logistics-costs" },
-        ],
-    },
-    {
-        titleKey: "menu.reports",
-        icon: NotebookIcon,
-        children: [
-            { titleKey: "menu.reports.orders", url: "#reports-orders" },
-            { titleKey: "menu.reports.topProducts", url: "#reports-top-products" },
-        ],
-    },
-    // 🔹 اطلاعات پایه (Master Data)
     {
         titleKey: "menu.basic",
         icon: SettingsIcon,
         children: [
-            { titleKey: "menu.basic.products", url: ROUTES.PRODUCTS },      // /products
-            { titleKey: "menu.basic.categories", url: ROUTES.CATEGORIES },  // /categories
             { titleKey: "menu.basic.brands", url: ROUTES.BRANDS },          // /brands
         ],
     },
